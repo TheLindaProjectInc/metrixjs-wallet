@@ -31,25 +31,25 @@ export interface INetworkInfo {
 export const networksInfo: { [key: string]: INetworkInfo } = {
   [NetworkNames.MAINNET]: {
     name: NetworkNames.MAINNET,
-    messagePrefix: "\u0015Qtum Signed Message:\n",
-    bech32: "bc",
-    bip32: { public: 76067358, private: 76066276 },
-    pubKeyHash: 58,
-    scriptHash: 50,
-    wif: 128,
+    messagePrefix: '\x15Metrix Signed Message:\n',
+    bech32: "mc",
+    bip32: { public: 0x0488b21e, private: 0x0488ade4 },
+    pubKeyHash: 0x32,
+    scriptHash: 0x55,
+    wif: 0x99,
   },
   [NetworkNames.TESTNET]: {
     name: NetworkNames.TESTNET,
-    messagePrefix: "\u0015Qtum Signed Message:\n",
-    bech32: "tb",
-    bip32: { public: 70617039, private: 70615956 },
-    pubKeyHash: 120,
-    scriptHash: 110,
-    wif: 239,
+    messagePrefix: '\x15Metrix Signed Message:\n',
+    bech32: 'tm',
+    bip32: { public: 0x043587cf, private: 0x04358394 },
+    pubKeyHash: 0x6e,
+    scriptHash: 0xbb,
+    wif: 0xef,
   },
   [NetworkNames.REGTEST]: {
     name: NetworkNames.REGTEST,
-    messagePrefix: "\u0015Qtum Signed Message:\n",
+    messagePrefix: '\x15Metrix Signed Message:\n',
     bech32: "tb",
     bip32: { public: 70617039, private: 70615956 },
     pubKeyHash: 120,
@@ -104,7 +104,7 @@ export class Network {
   }
 
   /**
-   * Restore 10 wallet addresses exported from QTUM's mobile clients. These
+   * Restore 10 wallet addresses exported from METRIX's mobile clients. These
    * wallets are 10 sequential addresses rooted at the HD-wallet path
    * `m/88'/0'/0'` `m/88'/0'/1'` `m/88'/0'/2'`, and so on.
    *

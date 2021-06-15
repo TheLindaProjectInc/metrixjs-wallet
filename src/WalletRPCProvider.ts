@@ -20,7 +20,7 @@ export class WalletRPCProvider implements IProvider {
       gasPrice,
     ] = params
 
-    // The underlying qtumjs-wallet API expects gasPrice and amount to be specified in sat
+    // The underlying metrixjs-wallet API expects gasPrice and amount to be specified in sat
     const gasPriceInSatoshi = Math.floor((gasPrice || 0.0000004) * 1e8)
     const amountInSatoshi = Math.floor((amount || 0) * 1e8)
 

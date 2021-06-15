@@ -2,7 +2,7 @@ import { assert } from "chai"
 
 import { Wallet, networks } from "./"
 import { sleep } from "./time"
-import { generateBlock } from "./qtumRPC"
+import { generateBlock } from "./metrixRPC"
 
 describe("Contract", () => {
   const network = networks.regtest

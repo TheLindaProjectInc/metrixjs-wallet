@@ -2,7 +2,7 @@ import { assert } from "chai"
 
 import { networks, Wallet, WalletRPCProvider } from "./"
 import { Insight } from "./Insight"
-import { generateBlock } from "./qtumRPC"
+import { generateBlock } from "./metrixRPC"
 import { sleep } from "./time"
 
 describe("WalletRPCProvider", async () => {

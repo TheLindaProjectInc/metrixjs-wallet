@@ -1,4 +1,4 @@
-declare module "qtumd-rpc" {
+declare module "metrixd-rpc" {
     export interface IConfig {
         protocol?: string
         user?: string

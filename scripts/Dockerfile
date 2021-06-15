@@ -1,3 +1,3 @@
-FROM dcb9/qtum-insightapi
+FROM dcb9/metrix-insightapi
 
 COPY init-accounts.sh /usr/local/bin/

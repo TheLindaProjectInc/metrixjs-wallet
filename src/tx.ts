@@ -107,7 +107,7 @@ export function estimatePubKeyHashTransactionMaxSend(
       return maxAmount
     }
 
-    // step down by 0.001 qtum
+    // step down by 0.001 metrix
     maxAmount = maxAmount - 100000
   }
 

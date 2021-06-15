@@ -1,4 +1,4 @@
-const { networks, generateMnemonic } = require("qtumjs-wallet");
+const { networks, generateMnemonic } = require("metrixjs-wallet");
 
 async function main() {
   const network = networks.testnet;

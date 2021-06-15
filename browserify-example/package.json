@@ -5,6 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "browserify": "^16.5.1",
-    "qtumjs-wallet": "^0.2.1"
+    "metrixjs-wallet": "^0.2.1"
   }
 }

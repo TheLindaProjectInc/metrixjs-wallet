@@ -1,8 +1,8 @@
-import RpcClient, {IConfig} from "qtumd-rpc"
+import RpcClient, {IConfig} from "metrixd-rpc"
 
 import {Network, NetworkNames} from "./Network"
 
-export default class QtumRPC {
+export default class MetrixRPC {
   public rpc: RpcClient
 
   constructor(config?: IConfig) {
@@ -21,10 +21,10 @@ export default class QtumRPC {
   }
 }
 
-export const rpcClient = new QtumRPC({
-  user: "qtum",
-  pass: "test",
-  port: "18332",
+export const rpcClient = new MetrixRPC({
+  user: "user",
+  pass: "pass",
+  port: "33831",
   protocol: "http",
 })
 

@@ -4,9 +4,9 @@ import { INetworkInfo } from "./Network"
 import { NetworkNames } from "./constants"
 
 const INSIGHT_BASEURLS: { [key: string]: string } = {
-  [NetworkNames.MAINNET]: "https://insight.backendq.com/insight-api",
-  [NetworkNames.TESTNET]: "https://testnet.qtum.org/insight-api",
-  [NetworkNames.REGTEST]: "http://localhost:3001/insight-api",
+  [NetworkNames.MAINNET]: "https://explorer.metrixcoin.com/api",
+  [NetworkNames.TESTNET]: "https://testnet-explorer.metrixcoin.com/api",
+  [NetworkNames.REGTEST]: "http://localhost:3001/api",
 }
 
 export class Insight {
@@ -187,7 +187,7 @@ export namespace Insight {
     addrStr: string
 
     /**
-     * balance of address in qtum
+     * balance of address in metrix
      */
     balance: number
 

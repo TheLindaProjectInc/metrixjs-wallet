@@ -11,7 +11,7 @@ then
 	set -
 fi
 
-LOCKFILE=${QTUM_DATADIR}/import-test-wallet.lock
+LOCKFILE=${METRIX_DATADIR}/import-test-wallet.lock
 
 if [ ! -e $LOCKFILE ]; then
   while
