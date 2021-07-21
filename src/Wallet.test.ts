@@ -16,31 +16,31 @@ describe("Wallet", () => {
     assert.equal(words.length, 12)
   })
 
-  const testMnemonic = "behind lunar size snap unfold stereo case shift flavor shove cricket divorce"
-  const password = "covfefe"
+  const testMnemonic = "slogan exhibit sea honey kick seek country fire eternal ancient hope soon"
+  const password = "password"
 
   it("recovers wallet from mnemonic", async () => {
     const wallet = await network.fromMnemonic(testMnemonic)
-    assert.equal(wallet.address, "qPVw7ZSjV8G2Xdr6rtxhR2riWf9SDkzDVo")
+    assert.equal(wallet.address, "MB7A7PtcsWktcXtpkFTKRKYVVbz1GaXn8R")
   })
 
   it("recovers wallet from mnemonic with password", async () => {
     const wallet = await network.fromMnemonic(testMnemonic, password)
 
-    assert.equal(wallet.address, "mJSUjMyHRZ4J1DmsCKd4R14cmb8CAWLZG8")
+    assert.equal(wallet.address, "MB7A7PtcsWktcXtpkFTKRKYVVbz1GaXn8R")
   })
 
-  const wifPrivateKey = "cMbgxCJrTYUqgcmiC1berh5DFrtY1KeU4PXZ6NZxgenniF1mXCRk"
+  const wifPrivateKey = "PfeQc1gbxry2qzpzhYmZB4MWvynr3w8h2dqyZXthNN2tYMz2mpxX"
 
   it("recovers wallet from WIF", () => {
     const wallet = network.fromWIF(wifPrivateKey)
 
-    assert.equal(wallet.address, "mUbxboqjBRp96j3La8D1RYkyqx5uQbJPoW")
+    assert.equal(wallet.address, "MB7A7PtcsWktcXtpkFTKRKYVVbz1GaXn8R")
   })
 
   it("recovers wallet from EncryptedPrivateKey", () => {
-    const wif = "cNQKccYYQyGX9G9Qxq2DJev9jHygbZpb2UG7EvUapbtDx5XhkhYE"
-    const encryptPassword = "testtest"
+    const wif = "6PYQ662QvW1p9TeU7LruGXMyKQYv5TdBoaAzWyf34eSs1YDDwFQbkRVWGL"
+    const encryptPassword = "password"
 
     const wallet = network.fromWIF(wif)
 

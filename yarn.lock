@@ -23,6 +23,11 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
+"@types/big.js@^6.1.1":
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/@types/big.js/-/big.js-6.1.1.tgz#c2be5e81e0cf0c1c31704e3b12f750712f647414"
+  integrity sha512-Zns+nT0hj96ie+GDbL5NeHxhL4wNz8QMxCHqBvxgc4x0hhgQ/o92rPwqxvPBhY3ZYnH8TJGw/8oCkjhOy2Rfzw==
+
 "@types/bigi@*":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@types/bigi/-/bigi-1.4.0.tgz#6c651df0a66f39075ae92745d648e2281cb9aeb9"
@@ -157,6 +162,11 @@ base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
+
+big.js@^6.1.1:
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/big.js/-/big.js-6.1.1.tgz#63b35b19dc9775c94991ee5db7694880655d5537"
+  integrity sha512-1vObw81a8ylZO5ePrtMay0n018TcftpTA5HFKDaSuiUDBo8biRBtjIobw60OpwuvrGk+FsxKamqN4cnmj/eXdg==
 
 bigi@^1.1.0, bigi@^1.2.0:
   version "1.4.2"

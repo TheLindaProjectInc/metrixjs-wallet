@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios"
+import Big from 'big.js';
 
 import { INetworkInfo } from "./Network"
 import { NetworkNames } from "./constants"
@@ -37,21 +38,99 @@ export class Insight {
     })
   }
 
+  public static toSatoshi(amount: number | Big) {
+    try {
+        return (amount as Big).times(100000000);
+    } catch (ex) {
+        return Math.round(amount as number * 100000000);
+    }
+}
+
+  public static fromSatoshi(amount: number | Big) {
+      try {
+          return (amount as Big).div(100000000);
+      } catch (ex) {
+          return Math.round(amount as number / 100000000);
+      }
+  }
+
   public async listUTXOs(address: string): Promise<Insight.IUTXO[]> {
-    const res = await this.axios.get(`/addr/${address}/utxo`)
-    return res.data
+    const res = await this.axios.get(`/address/${address}/utxo`)
+    let result: Insight.IUTXO[] = [];
+    if(res.data.length > 0) {
+      res.data.forEach((utxo: {txid: string; outputIndex: number; scriptPubKey: string; value: string; isStake: boolean; blockHeight: number; confirmations: number }) => {
+        result.push({
+          address: address,
+          txid: utxo.txid,
+          vout: utxo.outputIndex,
+      
+          /**
+           * Public key that controls this UXTO, as hex string.
+           */
+          scriptPubKey: utxo.scriptPubKey,
+      
+          amount: Insight.fromSatoshi(parseInt(utxo.value, 10)) as number,
+          satoshis: parseInt(utxo.value, 10),
+      
+          isStake: utxo.isStake,
+          height: utxo.blockHeight,
+          confirmations: utxo.confirmations,
+          })
+      });
+      return result;
+    }
+    return result
   }
 
   public async getInfo(address: string): Promise<Insight.IGetInfo> {
-    const res = await this.axios.get(`/addr/${address}`)
-    return res.data
+    const res = await this.axios.get(`/address/${address}`)
+
+    const txres = await this.axios.get(`/address/${address}/txs`)
+
+    let result: Insight.IGetInfo = {} as Insight.IGetInfo;
+
+    if(res.data.length > 0) {
+      res.data.forEach((info: { 
+        addrStr: string; 
+        balance: string; 
+        totalReceived: string; 
+        totalSent: string; 
+        unconfirmed: string; 
+        unconfirmedTxApperances: number; 
+        transactionCount: number;
+        transactions: string[]}) => {
+
+          let txlist: string[] = [];
+          if(txres.data.transactions.length > 0) {
+            txlist = [...txres.data.transactions]
+          }
+
+        result = {
+          addrStr: address,
+          balance: Insight.fromSatoshi(parseInt(info.balance, 10)) as number,
+          balanceSat: parseInt(info.balance),
+          totalReceived: Insight.fromSatoshi(parseInt(info.totalReceived, 10)) as number,
+          totalReceivedSat: parseInt(info.totalReceived),
+          totalSet: Insight.fromSatoshi(parseInt(info.totalSent, 10)) as number,
+          totalSentSat: parseInt(info.totalSent),
+          unconfirmedBalance: Insight.fromSatoshi(parseInt(info.unconfirmed, 10)) as number,
+          unconfirmedBalanceSat: parseInt(info.unconfirmed),
+          unconfirmedTxApperances: 0,
+          txApperances: info.transactionCount,
+          transactions: txlist}
+      });
+      return result;
+    }
+    return result
   }
 
   public async sendRawTx(rawtx: string): Promise<Insight.ISendRawTxResult> {
     const res = await this.axios.post("/tx/send", {
       rawtx,
     })
-
+    if (res.data.status === 0) {
+      return {txid: res.data.id}
+    }
     return res.data
   }
 
@@ -62,7 +141,7 @@ export class Insight {
     // FIXME wow, what a weird API design... maybe we should just host the RPC
     // server, with limited API exposed.
     const res = await this.axios.get(
-      `/contracts/${address}/hash/${encodedData}/call`,
+      `/contracts/${address}/call?data=${encodedData}`,
     )
 
     return res.data
@@ -75,14 +154,15 @@ export class Insight {
    * @param nblocks
    */
   public async estimateFee(nblocks: number = 6): Promise<any> {
-    const res = await this.axios.get(`/utils/estimatefee?nbBlocks=${nblocks}`)
+    //const res = await this.axios.get(`/utils/estimatefee?nbBlocks=${nblocks}`)
+    const res = await this.axios.get(`/info`)
 
-    const feeRate: number = res.data
+    const feeRate: number = res.data.feeRate;
     if (typeof feeRate !== "number" || feeRate < 0) {
       return -1
     }
 
-    return Math.ceil(feeRate * 1e8)
+    return Insight.toSatoshi(feeRate) as number;
   }
 
   /**
@@ -109,7 +189,89 @@ export class Insight {
     id: string,
   ): Promise<Insight.IRawTransactionInfo> {
     const res = await this.axios.get(`/tx/${id}`)
-    return res.data as Insight.IRawTransactionInfo
+
+    const block = await this.axios.get(`/block/${res.data.blockHash}`)
+
+    let isqrc20 = false;
+    let fee = 0;
+
+    if(res.data.hasOwnProperty("mrc20TokenTransfers")) {
+      isqrc20 = true;
+    }
+
+    if(res.data.isCoinstake === false) {
+      fee = res.data.fees;
+    } else {
+      fee = 0;
+    }
+
+    let txVin: Insight.IVin[] = [];
+    let txVout: Insight.IVout[] = [];
+
+    res.data.inputs.forEach((vin: { prevTxId: any; address: any; }) => {
+      txVin.push({
+        txid: vin.prevTxId,
+        addr: vin.address
+      });
+    });
+
+    res.data.outputs.forEach((vout: { value: any; scriptPubKey: any; }) => {
+      txVout.push({
+        value: vout.value,
+        scriptPubKey: vout.scriptPubKey
+      });
+    });
+
+    let txReceipt: Insight.ITransactionReceipt[] = [];
+
+    if (res.data.outputs.receipt) {
+      let txindex = 0;
+      let txReceiptTo = "";
+
+      if(res.data.outputs.receipt.mrc20TokenTransfers.length>0) {
+        txReceiptTo = res.data.outputs.receipt.mrc20TokenTransfers[0].to;
+      }
+      
+      block.data.transactions.forEach((tx: string, index: number) => {
+        if (tx = res.data.hash) {
+          txindex = index;
+        }
+      });
+
+      txReceipt.push({
+        blockHash: res.data.blockHash,
+        blockNumber: res.data.blockHeight,
+        contractAddress: res.data.outputs.receipt.contractAddress,
+        cumulativeGasUsed: res.data.outputs.receipt.gasUsed,
+        excepted: res.data.outputs.receipt.excepted,
+        from: res.data.outputs.receipt.sender,
+        to: txReceiptTo,
+        gasUsed: res.data.outputs.receipt.gasUsed,
+        log: res.data.outputs.receipt.logs,
+        transactionHash: res.data.hash,
+        transactionIndex: txindex,
+      });
+      }
+    
+
+    let result: Insight.IRawTransactionInfo = {
+      txid: res.data.id,
+      version: res.data.version,
+      locktime: res.data.locktime,
+      receipt: txReceipt,
+      vin: res.data.inputs,
+      vout: res.data.outputs,
+      confirmations: res.data.confirmations,
+      time: res.data.timestamp,
+      valueOut: res.data.outputValue,
+      valueIn: res.data.inputValue,
+      fees: fee,
+      blockhash: res.data.blockHash,
+      blockheight: res.data.blockHeight,
+      isqrc20Transfer: isqrc20
+    }
+
+    return result;
   }
 
   /**
@@ -121,10 +283,23 @@ export class Insight {
     address: string,
     pageNum: number = 0,
   ): Promise<Insight.IRawTransactions> {
-    const result = await this.axios.get(`/txs/`, {
-      params: { address, pageNum },
-    })
-    return result.data as Insight.IRawTransactions
+    const result = await this.axios.get(`/address/${address}/txs/pageSize=10&page=${pageNum}`);
+
+    let pages = 0;
+    let txList = [];
+
+    if(result.data.transactions.length > 0) {
+      for (let i=0;i<result.data.transactions;i++){
+        let currentTx = result.data.transactions[i];
+        let tx = await this.getTransactionInfo(currentTx);
+        if(tx) {
+          txList.push(tx);
+        }
+      }
+      pages = Math.ceil(result.data.transactions.totalCount / 10)
+    }
+
+    return {pagesTotal: pages, txs: [...txList]} as Insight.IRawTransactions
   }
 }
 
@@ -215,7 +390,7 @@ export namespace Insight {
 
   export interface IVin {
     txid: string
-    addr: string // 执行转出的钱包地址
+    addr: string
   }
 
   export interface IVout {
@@ -232,13 +407,13 @@ export namespace Insight {
     version: number
     locktime: number
     receipt: ITransactionReceipt[]
-    vin: IVin[] // 入账，[交易, ...]
-    vout: IVout[] // 出账，[交易, ...]
+    vin: IVin[]
+    vout: IVout[]
     confirmations: number
     time: number
-    valueOut: number // 扣除手续费的余额（发送方）
-    valueIn: number // 交易前余额（发送方）
-    fees: number // 手续费
+    valueOut: number 
+    valueIn: number
+    fees: number
     blockhash: string
     blockheight: number
     isqrc20Transfer: boolean

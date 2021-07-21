@@ -21,13 +21,13 @@ export class WalletRPCProvider implements IProvider {
     ] = params
 
     // The underlying metrixjs-wallet API expects gasPrice and amount to be specified in sat
-    const gasPriceInSatoshi = Math.floor((gasPrice || 0.0000004) * 1e8)
+    const gasPriceInSatoshi = Math.floor((gasPrice || 0.00005000) * 1e8)
     const amountInSatoshi = Math.floor((amount || 0) * 1e8)
 
     opts = {
       ...opts,
       amount: amountInSatoshi,
-      gasLimit: gasLimit || 200000,
+      gasLimit: gasLimit || 250000,
       gasPrice: gasPriceInSatoshi,
     }
 
