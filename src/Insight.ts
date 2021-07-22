@@ -89,36 +89,26 @@ export class Insight {
 
     let result: Insight.IGetInfo = {} as Insight.IGetInfo;
 
-    if(res.data.length > 0) {
-      res.data.forEach((info: { 
-        addrStr: string; 
-        balance: string; 
-        totalReceived: string; 
-        totalSent: string; 
-        unconfirmed: string; 
-        unconfirmedTxApperances: number; 
-        transactionCount: number;
-        transactions: string[]}) => {
-
-          let txlist: string[] = [];
-          if(txres.data.transactions.length > 0) {
-            txlist = [...txres.data.transactions]
-          }
+    if(res.data) {
+        let txlist: string[] = [];
+        if(txres.data.transactions.length > 0) {
+          txlist = [...txres.data.transactions]
+        }
 
         result = {
           addrStr: address,
-          balance: Insight.fromSatoshi(parseInt(info.balance, 10)) as number,
-          balanceSat: parseInt(info.balance),
-          totalReceived: Insight.fromSatoshi(parseInt(info.totalReceived, 10)) as number,
-          totalReceivedSat: parseInt(info.totalReceived),
-          totalSet: Insight.fromSatoshi(parseInt(info.totalSent, 10)) as number,
-          totalSentSat: parseInt(info.totalSent),
-          unconfirmedBalance: Insight.fromSatoshi(parseInt(info.unconfirmed, 10)) as number,
-          unconfirmedBalanceSat: parseInt(info.unconfirmed),
+          balance: Insight.fromSatoshi(parseInt(res.data.balance, 10)) as number,
+          balanceSat: parseInt(res.data.balance),
+          totalReceived: Insight.fromSatoshi(parseInt(res.data.totalReceived, 10)) as number,
+          totalReceivedSat: parseInt(res.data.totalReceived),
+          totalSet: Insight.fromSatoshi(parseInt(res.data.totalSent, 10)) as number,
+          totalSentSat: parseInt(res.data.totalSent),
+          unconfirmedBalance: Insight.fromSatoshi(parseInt(res.data.unconfirmed, 10)) as number,
+          unconfirmedBalanceSat: parseInt(res.data.unconfirmed),
           unconfirmedTxApperances: 0,
-          txApperances: info.transactionCount,
+          txApperances: res.data.transactionCount,
           transactions: txlist}
-      });
+          
       return result;
     }
     return result
