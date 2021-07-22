@@ -111,7 +111,7 @@ export class Insight {
           
       return result;
     }
-    return result
+    return result;
   }
 
   public async sendRawTx(rawtx: string): Promise<Insight.ISendRawTxResult> {
