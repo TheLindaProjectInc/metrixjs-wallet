@@ -1,6 +1,6 @@
 {
   "name": "metrixjs-wallet",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A toolkit for building metrix light wallets",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -37,6 +37,7 @@
     "bignumber.js": "^9.0.1",
     "bip38": "^3.1.1",
     "bip39": "^3.0.3",
+    "bitcoinjs-lib": "^3.3.1",
     "bs58check": "^2.1.2",
     "buffer": "^6.0.3",
     "coinselect": "^3.1.11",
