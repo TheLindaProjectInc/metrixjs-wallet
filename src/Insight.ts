@@ -214,12 +214,12 @@ export class Insight {
 
     let txReceipt: Insight.ITransactionReceipt[] = [];
 
-    if (res.data.outputs.receipt) {
+    if (res.data.outputs[0].receipt) {
       let txindex = 0;
       let txReceiptTo = "";
 
-      if(res.data.outputs.receipt.mrc20TokenTransfers.length>0) {
-        txReceiptTo = res.data.outputs.receipt.mrc20TokenTransfers[0].to;
+      if(res.data.outputs.mrc20TokenTransfers.length>0) {
+        txReceiptTo = res.data.outputs.mrc20TokenTransfers[0].to;
       }
       
       block.data.transactions.forEach((tx: string, index: number) => {
@@ -231,13 +231,13 @@ export class Insight {
       txReceipt.push({
         blockHash: res.data.blockHash,
         blockNumber: res.data.blockHeight,
-        contractAddress: res.data.outputs.receipt.contractAddress,
-        cumulativeGasUsed: res.data.outputs.receipt.gasUsed,
-        excepted: res.data.outputs.receipt.excepted,
-        from: res.data.outputs.receipt.sender,
+        contractAddress: res.data.outputs[0].receipt.contractAddress,
+        cumulativeGasUsed: res.data.outputs[0].receipt.gasUsed,
+        excepted: res.data.outputs[0].receipt.excepted,
+        from: res.data.outputs[0].receipt.sender,
         to: txReceiptTo,
-        gasUsed: res.data.outputs.receipt.gasUsed,
-        log: res.data.outputs.receipt.logs,
+        gasUsed: res.data.outputs[0].receipt.gasUsed,
+        log: res.data.outputs[0].receipt.logs,
         transactionHash: res.data.hash,
         transactionIndex: txindex,
       });
@@ -247,10 +247,10 @@ export class Insight {
     let result: Insight.IRawTransactionInfo = {
       txid: res.data.id,
       version: res.data.version,
-      locktime: res.data.locktime,
+      locktime: res.data.lockTime,
       receipt: txReceipt,
-      vin: res.data.inputs,
-      vout: res.data.outputs,
+      vin: txVin,
+      vout: txVout,
       confirmations: res.data.confirmations,
       time: res.data.timestamp,
       valueOut: res.data.outputValue,
@@ -273,20 +273,20 @@ export class Insight {
     address: string,
     pageNum: number = 0,
   ): Promise<Insight.IRawTransactions> {
-    const result = await this.axios.get(`/address/${address}/txs/pageSize=10&page=${pageNum}`);
-
+    const result = await this.axios.get(`/address/${address}/txs?pageSize=10&page=${pageNum}`);
+    
     let pages = 0;
     let txList = [];
 
     if(result.data.transactions.length > 0) {
-      for (let i=0;i<result.data.transactions;i++){
+      for (let i=0;i<result.data.transactions.length;i++){
         let currentTx = result.data.transactions[i];
         let tx = await this.getTransactionInfo(currentTx);
         if(tx) {
           txList.push(tx);
         }
       }
-      pages = Math.ceil(result.data.transactions.totalCount / 10)
+      pages = Math.ceil(result.data.totalCount / 10)
     }
 
     return {pagesTotal: pages, txs: [...txList]} as Insight.IRawTransactions
