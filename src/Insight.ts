@@ -58,10 +58,10 @@ export class Insight {
     const res = await this.axios.get(`/address/${address}/utxo`)
     let result: Insight.IUTXO[] = [];
     if(res.data.length > 0) {
-      res.data.forEach((utxo: {txid: string; outputIndex: number; scriptPubKey: string; value: string; isStake: boolean; blockHeight: number; confirmations: number }) => {
+      res.data.forEach((utxo: {transactionId: string; outputIndex: number; scriptPubKey: string; value: string; isStake: boolean; blockHeight: number; confirmations: number }) => {
         result.push({
           address: address,
-          txid: utxo.txid,
+          txid: utxo.transactionId,
           vout: utxo.outputIndex,
       
           /**
