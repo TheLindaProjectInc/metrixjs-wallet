@@ -1,6 +1,6 @@
 {
   "name": "metrixjs-wallet",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "A toolkit for building metrix light wallets",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
