@@ -274,7 +274,7 @@ export class Insight {
     address: string,
     pageNum: number = 0,
   ): Promise<Insight.IRawTransactions> {
-    const result = await this.axios.get(`/address/${address}/txs?pageSize=10&page=${pageNum}`);
+    const result = await this.axios.get(`/address/${address}/txs-detail?pageSize=10&page=${pageNum}`);
      
     let pages = Math.ceil(result.data.totalCount / 10);
     let txList = [];
