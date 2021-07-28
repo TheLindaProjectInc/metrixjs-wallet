@@ -3,6 +3,7 @@ import Big from 'big.js';
 
 import { INetworkInfo } from "./Network"
 import { NetworkNames } from "./constants"
+import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "node:constants";
 
 const INSIGHT_BASEURLS: { [key: string]: string } = {
   [NetworkNames.MAINNET]: "https://explorer.metrixcoin.com/api",
@@ -274,19 +275,87 @@ export class Insight {
     pageNum: number = 0,
   ): Promise<Insight.IRawTransactions> {
     const result = await this.axios.get(`/address/${address}/txs?pageSize=10&page=${pageNum}`);
-    
-    let pages = 0;
+     
+    let pages = Math.ceil(result.data.totalCount / 10);
     let txList = [];
 
     if(result.data.transactions.length > 0) {
-      for (let i=0;i<result.data.transactions.length;i++){
-        let currentTx = result.data.transactions[i];
-        let tx = await this.getTransactionInfo(currentTx);
-        if(tx) {
-          txList.push(tx);
+      for (let i = 0; i < result.data.transactions.length; i++) {
+        let res = result.data.transactions[i];
+
+        let isqrc20 = false;
+        let fee = 0;
+    
+        if(res.hasOwnProperty("mrc20TokenTransfers")) {
+          isqrc20 = true;
         }
+    
+        if(res.isCoinstake === false) {
+          fee = res.fees;
+        } else {
+          fee = 0;
+        }
+    
+        let txVin: Insight.IVin[] = [];
+        let txVout: Insight.IVout[] = [];
+    
+        res.inputs.forEach((vin: { prevTxId: any; address: any; }) => {
+          txVin.push({
+            txid: vin.prevTxId,
+            addr: vin.address
+          });
+        });
+    
+        res.outputs.forEach((vout: { value: any; scriptPubKey: any; }) => {
+          txVout.push({
+            value: vout.value,
+            scriptPubKey: vout.scriptPubKey
+          });
+        });
+    
+        let txReceipt: Insight.ITransactionReceipt[] = [];
+    
+        if (res.outputs[0].receipt) {
+          let txindex = 0;
+          let txReceiptTo = "";
+    
+          if(res.mrc20TokenTransfers.length > 0) {
+            txReceiptTo = res.mrc20TokenTransfers[0].to;
+          }
+            
+          txReceipt.push({
+            blockHash: res.blockHash,
+            blockNumber: res.blockHeight,
+            contractAddress: res.outputs[0].receipt.contractAddress,
+            cumulativeGasUsed: res.outputs[0].receipt.gasUsed,
+            excepted: res.outputs[0].receipt.excepted,
+            from: res.outputs[0].receipt.sender,
+            to: txReceiptTo,
+            gasUsed: res.outputs[0].receipt.gasUsed,
+            log: res.outputs[0].receipt.logs,
+            transactionHash: res.hash,
+            transactionIndex: res.outputIndex,
+          });
+          }
+        
+    
+        txList.push({
+          txid: res.id,
+          version: res.version,
+          locktime: res.lockTime,
+          receipt: txReceipt,
+          vin: txVin,
+          vout: txVout,
+          confirmations: res.confirmations,
+          time: res.timestamp,
+          valueOut: res.outputValue,
+          valueIn: res.inputValue,
+          fees: fee,
+          blockhash: res.blockHash,
+          blockheight: res.blockHeight,
+          isqrc20Transfer: isqrc20
+        })
       }
-      pages = Math.ceil(result.data.totalCount / 10)
     }
 
     return {pagesTotal: pages, txs: [...txList]} as Insight.IRawTransactions
