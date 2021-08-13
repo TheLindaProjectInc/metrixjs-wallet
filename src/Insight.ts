@@ -219,7 +219,7 @@ export class Insight {
       let txindex = 0;
       let txReceiptTo = "";
 
-      if(res.data.mrc20TokenTransfers.length > 0) {
+      if(res.data.mrc20TokenTransfers && res.data.mrc20TokenTransfers.length > 0) {
         txReceiptTo = res.data.mrc20TokenTransfers[0].to;
       }
       
