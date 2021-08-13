@@ -209,7 +209,7 @@ export class Insight {
     res.data.outputs.forEach((vout: { value: any; address: any; }) => {
       txVout.push({
         value: vout.value,
-        scriptPubKey: vout.address
+        scriptPubKey: { addresses: vout.address }
       });
     });
 
@@ -311,7 +311,7 @@ export class Insight {
         res.outputs.forEach((vout: { value: any; address: any; }) => {
           txVout.push({
             value: vout.value,
-            scriptPubKey: vout.address
+            scriptPubKey: { addresses: vout.address }
           });
         });
     
