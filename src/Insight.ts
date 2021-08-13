@@ -219,8 +219,10 @@ export class Insight {
       let txindex = 0;
       let txReceiptTo = "";
 
-      if(res.data.mrc20TokenTransfers && res.data.mrc20TokenTransfers.length > 0) {
-        txReceiptTo = res.data.mrc20TokenTransfers[0].to;
+      if(res.data.hasOwnProperty("mrc20TokenTransfers")) {
+        if(res.data.mrc20TokenTransfers.length > 0) {
+          txReceiptTo = res.data.mrc20TokenTransfers[0].to;
+        }
       }
       
       block.data.transactions.forEach((tx: string, index: number) => {
