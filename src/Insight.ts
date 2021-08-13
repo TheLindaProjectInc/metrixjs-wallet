@@ -320,9 +320,11 @@ export class Insight {
         if (res.outputs[0].receipt) {
           let txindex = 0;
           let txReceiptTo = "";
-    
-          if(res.mrc20TokenTransfers.length > 0) {
-            txReceiptTo = res.mrc20TokenTransfers[0].to;
+          
+          if(res.hasOwnProperty("mrc20TokenTransfers")) {
+            if(res.mrc20TokenTransfers.length > 0) {
+              txReceiptTo = res.mrc20TokenTransfers[0].to;
+            }
           }
             
           txReceipt.push({
