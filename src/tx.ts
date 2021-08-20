@@ -243,7 +243,7 @@ export function buildCreateContractTransaction(
 
 const defaultContractSendTxOptions = {
   gasLimit: 250000,
-  gasPrice: 40, // 40 satoshi / gas
+  gasPrice: 5000, // 5000 satoshi / gas
   amount: 0,
 
   // Wallet uses only one address. Can't really support senderAddress.
@@ -387,8 +387,8 @@ export function buildSendToContractTransaction(
   return txb.build().toHex()
 }
 
-// The prevalent network fee is 0.004 per KB. If set to 100 times of norm, assume error.
-const MAX_FEE_RATE = Math.ceil((0.004 * 100 * 1e8) / 1024)
+// The prevalent network fee is 10 per KB. If set to 100 times of norm, assume error.
+const MAX_FEE_RATE = Math.ceil((10 * 100 * 1e8) / 1024)
 
 function checkFeeRate(feeRate: number) {
   if (feeRate > MAX_FEE_RATE) {

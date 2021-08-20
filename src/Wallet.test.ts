@@ -99,7 +99,7 @@ describe("Wallet", () => {
     const receiverOldInfo = await insight.getInfo(toAddress)
 
     const tx = await wallet.send(toAddress, amount, {
-      feeRate: 4000, // 0.04 metrix / KB
+      feeRate: 5000, // 0.04 metrix / KB
     })
     assert.isNotEmpty(tx.txid)
 
