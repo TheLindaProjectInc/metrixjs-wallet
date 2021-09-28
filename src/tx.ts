@@ -97,21 +97,64 @@ export function estimatePubKeyHashTransactionMaxSend(
   }
 
   while (maxAmount > 0) {
-    const { inputs, fee: txfee } = coinSelect(
-      utxos,
-      [{ value: maxAmount, address: to }],
-      feeRate,
-    )
+    let inputs = selectTxs(utxos, maxAmount, feeRate);
+    // const { inputs, fee: txfee } = coinSelect(
+    //   utxos,
+    //   [{ value: maxAmount, address: to }],
+    //   feeRate,
+    // )
 
     if (inputs != null) {
       return maxAmount
     }
 
-    // step down by 0.001 metrix
-    maxAmount = maxAmount - 100000
+    // step down by 0.01 metrix
+    maxAmount = maxAmount - 1000000
   }
 
   return 0
+}
+
+/**
+ * This is a function for selecting MRX utxos to build transactions
+ * the transaction object takes at least 3 fields, value(satoshis) , confirmations and isStake
+ *
+ * @param [transaction] unspentTransactions
+ * @param Number amount(unit: satoshis)
+ * @param Number fee(unit: satoshis)
+ * @returns [transaction]
+ */
+ function selectTxs(unspentTransactions: any, amount: number, fee: number) {
+  //sort the utxo
+  var matureList = []
+  var immatureList = []
+  for(var i = 0; i < unspentTransactions.length; i++) {
+      if(unspentTransactions[i].confirmations >= 960 || unspentTransactions[i].isStake === false) {
+          matureList[matureList.length] = unspentTransactions[i]
+      }
+      else {
+          immatureList[immatureList.length] = unspentTransactions[i]
+      }
+  }
+  matureList.sort(function(a, b) {return a.value - b.value})
+  immatureList.sort(function(a, b) {return b.confirmations - a.confirmations})
+  unspentTransactions = matureList.concat(immatureList)
+
+  var value = new BigNumber(amount)
+  var find = []
+  var findTotal = new BigNumber(0)
+  var feeTotal = new BigNumber(0);
+  for (var i = 0; i < unspentTransactions.length; i++) {
+      var tx = unspentTransactions[i]
+      findTotal = findTotal.plus(tx.value)
+      find[find.length] = tx
+      feeTotal = feeTotal.plus(fee)
+      if (findTotal.isGreaterThanOrEqualTo(value.plus(feeTotal))) break
+  }
+  if (value.isGreaterThan(findTotal)) {
+      throw new Error('You do not have enough MRX to send')
+  }
+  return {inputs: find, feeTotal: feeTotal.toNumber()}
 }
 
 /**
@@ -134,11 +177,12 @@ export function buildPubKeyHashTransaction(
 
   const senderAddress = keyPair.getAddress()
 
-  const { inputs, fee: txfee } = coinSelect(
-    utxos,
-    [{ value: amount, address: to }],
-    feeRate,
-  )
+  // const { inputs, fee: txfee } = coinSelect(
+  //   utxos,
+  //   [{ value: amount, address: to }],
+  //   feeRate,
+  // )
+  let {inputs, feeTotal: txfee} = selectTxs(utxos, amount, feeRate)
 
   if (inputs == null) {
     throw new Error("could not find UTXOs to build transaction")
@@ -150,6 +194,10 @@ export function buildPubKeyHashTransaction(
   for (const input of inputs) {
     txb.addInput(input.hash, input.pos)
     vinSum = vinSum.plus(input.value)
+  }
+
+  if (vinSum.isEqualTo(new BigNumber(amount))) {
+    amount = new BigNumber(amount).minus(txfee).toNumber();
   }
 
   txb.addOutput(to, amount)
