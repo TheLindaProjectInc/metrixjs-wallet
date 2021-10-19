@@ -8,8 +8,6 @@ import { Buffer } from "buffer"
 
 import { OPS } from "./opcodes"
 
-import coinSelect = require("coinselect")
-
 /**
  * Options for a payment transaction
  */
@@ -98,11 +96,6 @@ export function estimatePubKeyHashTransactionMaxSend(
 
   while (maxAmount > 0) {
     let inputs = selectTxs(utxos, maxAmount, feeRate);
-    // const { inputs, fee: txfee } = coinSelect(
-    //   utxos,
-    //   [{ value: maxAmount, address: to }],
-    //   feeRate,
-    // )
 
     if (inputs != null) {
       return maxAmount
@@ -177,11 +170,6 @@ export function buildPubKeyHashTransaction(
 
   const senderAddress = keyPair.getAddress()
 
-  // const { inputs, fee: txfee } = coinSelect(
-  //   utxos,
-  //   [{ value: amount, address: to }],
-  //   feeRate,
-  // )
   let {inputs, feeTotal: txfee} = selectTxs(utxos, amount, feeRate)
 
   if (inputs == null) {
@@ -246,17 +234,9 @@ export function buildCreateContractTransaction(
 
   const fromAddress = keyPair.getAddress()
   const amount = 0
+  const amountTotal = new BigNumber(amount).plus(gasLimitFee).toNumber();
 
-  const { inputs, fee: txfee } = coinSelect(
-    utxos,
-    [
-      // gas fee
-      { value: gasLimitFee },
-      // script + transfer amount to contract
-      { script: createContractScript, value: amount },
-    ],
-    feeRate,
-  )
+  let {inputs, feeTotal: txfee} = selectTxs(utxos, amountTotal, feeRate);
 
   if (inputs == null) {
     throw new Error("could not find UTXOs to build transaction")
@@ -334,14 +314,7 @@ export function estimateSendToContractTransactionMaxValue(
   ])
 
   while (amount > 0) {
-    const { inputs, fee: txfee } = coinSelect(
-      utxos,
-      [
-        { value: gasLimitFee }, // gas fee
-        { script: opcallScript, value: amount }, // script + transfer amount to contract
-      ],
-      feeRate,
-    )
+    let { inputs } = selectTxs(utxos, amount, feeRate);
 
     if (inputs != null) {
       return amount
@@ -370,7 +343,7 @@ export function buildSendToContractTransaction(
   feeRate: number,
   opts: IContractSendTXOptions = {},
 ): string {
-  // feeRate must be an integer number, or coinselect would always fail
+  // feeRate must be an integer number, or UTXO selection would always fail
   feeRate = Math.floor(feeRate)
 
   const gasLimit = opts.gasLimit || defaultContractSendTxOptions.gasLimit
@@ -392,15 +365,8 @@ export function buildSendToContractTransaction(
     Buffer.from(contractAddress, "hex"),
     OPS.OP_CALL,
   ])
-
-  const { inputs, fee: txfee } = coinSelect(
-    utxos,
-    [
-      { value: gasLimitFee }, // gas fee
-      { script: opcallScript, value: amount }, // script + transfer amount to contract
-    ],
-    feeRate,
-  )
+  const amountTotal = new BigNumber(amount).plus(gasLimitFee).toNumber();
+  let {inputs, feeTotal: txfee} = selectTxs(utxos, amountTotal, feeRate);
 
   if (inputs == null) {
     throw new Error("could not find UTXOs to build transaction")
