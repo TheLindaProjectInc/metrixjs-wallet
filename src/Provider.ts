@@ -3,6 +3,4 @@ export interface IProvider {
     method: string,
     params: any[],
     opts?: any) => Promise<any>
-
-  cancelTokenSource: () => any
 }

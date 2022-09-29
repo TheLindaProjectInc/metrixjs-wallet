@@ -1,5 +1,4 @@
 import { IProvider } from "./Provider"
-import axios, { CancelTokenSource } from "axios"
 import { Insight } from "./Insight"
 import { Wallet } from "./Wallet"
 
@@ -40,9 +39,4 @@ export class WalletRPCProvider implements IProvider {
         throw new Error("Unknow method call")
     }
   }
-
-  public cancelTokenSource(): CancelTokenSource {
-    return axios.CancelToken.source()
-  }
-
 }

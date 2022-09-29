@@ -1,9 +1,10 @@
-import axios, { AxiosInstance } from "axios"
 import Big from 'big.js';
+
+const fetch = require("node-fetch");
+const fetchAbsolute = require('fetch-absolute');
 
 import { INetworkInfo } from "./Network"
 import { NetworkNames } from "./constants"
-import { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } from "node:constants";
 
 const INSIGHT_BASEURLS: { [key: string]: string } = {
   [NetworkNames.MAINNET]: "https://explorer.metrixcoin.com/api",
@@ -29,14 +30,10 @@ export class Insight {
     return new Insight(baseURL)
   }
 
-  private axios: AxiosInstance
+    private fetchApi;
 
   constructor(private baseURL: string) {
-    this.axios = axios.create({
-      baseURL,
-      // don't throw on non-200 response
-      // validateStatus: () => true,
-    })
+    this.fetchApi = fetchAbsolute(fetch)(baseURL);
   }
 
   public static toSatoshi(amount: number | Big) {
@@ -56,10 +53,11 @@ export class Insight {
   }
 
   public async listUTXOs(address: string): Promise<Insight.IUTXO[]> {
-    const res = await this.axios.get(`/address/${address}/utxo`)
+    const response = await this.fetchApi(`/address/${address}/utxo`);
+    const res  = await response.json();
     let result: Insight.IUTXO[] = [];
-    if(res.data.length > 0) {
-      res.data.forEach((utxo: {transactionId: string; outputIndex: number; scriptPubKey: string; value: string; isStake: boolean; blockHeight: number; confirmations: number }) => {
+    if(res.length > 0) {
+      res.forEach((utxo: {transactionId: string; outputIndex: number; scriptPubKey: string; value: string; isStake: boolean; blockHeight: number; confirmations: number }) => {
         result.push({
           address: address,
           txid: utxo.transactionId,
@@ -84,30 +82,32 @@ export class Insight {
   }
 
   public async getInfo(address: string): Promise<Insight.IGetInfo> {
-    const res = await this.axios.get(`/address/${address}`)
+    const response = await this.fetchApi(`/address/${address}`);
+    const res = await response.json();
 
-    const txres = await this.axios.get(`/address/${address}/txs`)
+    const txresponse = await this.fetchApi(`/address/${address}/txs`);
+    const txres = await txresponse.json();
 
     let result: Insight.IGetInfo = {} as Insight.IGetInfo;
 
-    if(res.data) {
+    if(res) {
         let txlist: string[] = [];
-        if(txres.data.transactions.length > 0) {
-          txlist = [...txres.data.transactions]
+        if(txres.transactions.length > 0) {
+          txlist = [...txres.transactions]
         }
 
         result = {
           addrStr: address,
-          balance: Insight.fromSatoshi(parseInt(res.data.balance, 10)) as number,
-          balanceSat: parseInt(res.data.balance),
-          totalReceived: Insight.fromSatoshi(parseInt(res.data.totalReceived, 10)) as number,
-          totalReceivedSat: parseInt(res.data.totalReceived),
-          totalSet: Insight.fromSatoshi(parseInt(res.data.totalSent, 10)) as number,
-          totalSentSat: parseInt(res.data.totalSent),
-          unconfirmedBalance: Insight.fromSatoshi(parseInt(res.data.unconfirmed, 10)) as number,
-          unconfirmedBalanceSat: parseInt(res.data.unconfirmed),
+          balance: Insight.fromSatoshi(parseInt(res.balance, 10)) as number,
+          balanceSat: parseInt(res.balance),
+          totalReceived: Insight.fromSatoshi(parseInt(res.totalReceived, 10)) as number,
+          totalReceivedSat: parseInt(res.totalReceived),
+          totalSet: Insight.fromSatoshi(parseInt(res.totalSent, 10)) as number,
+          totalSentSat: parseInt(res.totalSent),
+          unconfirmedBalance: Insight.fromSatoshi(parseInt(res.unconfirmed, 10)) as number,
+          unconfirmedBalanceSat: parseInt(res.unconfirmed),
           unconfirmedTxApperances: 0,
-          txApperances: res.data.transactionCount,
+          txApperances: res.transactionCount,
           transactions: txlist}
           
       return result;
@@ -116,13 +116,16 @@ export class Insight {
   }
 
   public async sendRawTx(rawtx: string): Promise<Insight.ISendRawTxResult> {
-    const res = await this.axios.post("/tx/send", {
-      rawtx,
-    })
-    if (res.data.status === 0) {
-      return {txid: res.data.id}
+    const response = await this.fetchApi("/tx/send", { 
+      method: 'post',
+      body: JSON.stringify({ rawtx: rawtx }),
+      headers: { "Content-Type": "application/json" }
+    });
+    const res = await response.json();
+    if (res.status === 0) {
+      return {txid: res.id}
     }
-    return res.data
+    return res
   }
 
   public async contractCall(
@@ -131,11 +134,12 @@ export class Insight {
   ): Promise<Insight.IContractCall> {
     // FIXME wow, what a weird API design... maybe we should just host the RPC
     // server, with limited API exposed.
-    const res = await this.axios.get(
+    const response = await this.fetchApi(
       `/contract/${address}/call?data=${encodedData}`,
     )
+    const res = response.json();
 
-    return res.data
+    return res
   }
 
   /**
@@ -145,10 +149,11 @@ export class Insight {
    * @param nblocks
    */
   public async estimateFee(nblocks: number = 6): Promise<any> {
-    //const res = await this.axios.get(`/utils/estimatefee?nbBlocks=${nblocks}`)
-    const res = await this.axios.get(`/info`)
+    const response = await this.fetchApi(`/info`);
+    const res = await response.json();
 
-    const feeRate: number = res.data.feeRate;
+
+    const feeRate: number = res.feeRate;
     if (typeof feeRate !== "number" || feeRate < 0) {
       return -1
     }
@@ -179,19 +184,21 @@ export class Insight {
   public async getTransactionInfo(
     id: string,
   ): Promise<Insight.IRawTransactionInfo> {
-    const res = await this.axios.get(`/tx/${id}`)
+    const response = await this.fetchApi(`/tx/${id}`);
+    const res = await response.json();
 
-    const block = await this.axios.get(`/block/${res.data.blockHash}`)
+    const blockresponse = await this.fetchApi(`/block/${res.blockHash}`);
+    const block = blockresponse.json();
 
     let isqrc20 = false;
     let fee = 0;
 
-    if(res.data.hasOwnProperty("mrc20TokenTransfers")) {
+    if(res.hasOwnProperty("mrc20TokenTransfers")) {
       isqrc20 = true;
     }
 
-    if(res.data.isCoinstake === false) {
-      fee = res.data.fees;
+    if(res.isCoinstake === false) {
+      fee = res.fees;
     } else {
       fee = 0;
     }
@@ -199,14 +206,14 @@ export class Insight {
     let txVin: Insight.IVin[] = [];
     let txVout: Insight.IVout[] = [];
 
-    res.data.inputs.forEach((vin: { prevTxId: any; address: any; }) => {
+    res.inputs.forEach((vin: { prevTxId: any; address: any; }) => {
       txVin.push({
         txid: vin.prevTxId,
         addr: vin.address
       });
     });
 
-    res.data.outputs.forEach((vout: { value: any; address: any; }) => {
+    res.outputs.forEach((vout: { value: any; address: any; }) => {
       txVout.push({
         value: vout.value,
         scriptPubKey: { addresses: vout.address }
@@ -215,52 +222,52 @@ export class Insight {
 
     let txReceipt: Insight.ITransactionReceipt[] = [];
 
-    if (res.data.outputs[0].receipt) {
+    if (res.outputs[0].receipt) {
       let txindex = 0;
       let txReceiptTo = "";
 
-      if(res.data.hasOwnProperty("mrc20TokenTransfers")) {
-        if(res.data.mrc20TokenTransfers.length > 0) {
-          txReceiptTo = res.data.mrc20TokenTransfers[0].to;
+      if(res.hasOwnProperty("mrc20TokenTransfers")) {
+        if(res.mrc20TokenTransfers.length > 0) {
+          txReceiptTo = res.mrc20TokenTransfers[0].to;
         }
       }
       
-      block.data.transactions.forEach((tx: string, index: number) => {
-        if (tx = res.data.hash) {
+      block.transactions.forEach((tx: string, index: number) => {
+        if (tx = res.hash) {
           txindex = index;
         }
       });
 
       txReceipt.push({
-        blockHash: res.data.blockHash,
-        blockNumber: res.data.blockHeight,
-        contractAddress: res.data.outputs[0].receipt.contractAddress,
-        cumulativeGasUsed: res.data.outputs[0].receipt.gasUsed,
-        excepted: res.data.outputs[0].receipt.excepted,
-        from: res.data.outputs[0].receipt.sender,
+        blockHash: res.blockHash,
+        blockNumber: res.blockHeight,
+        contractAddress: res.outputs[0].receipt.contractAddress,
+        cumulativeGasUsed: res.outputs[0].receipt.gasUsed,
+        excepted: res.outputs[0].receipt.excepted,
+        from: res.outputs[0].receipt.sender,
         to: txReceiptTo,
-        gasUsed: res.data.outputs[0].receipt.gasUsed,
-        log: res.data.outputs[0].receipt.logs,
-        transactionHash: res.data.hash,
+        gasUsed: res.outputs[0].receipt.gasUsed,
+        log: res.outputs[0].receipt.logs,
+        transactionHash: res.hash,
         transactionIndex: txindex,
       });
       }
     
 
     let result: Insight.IRawTransactionInfo = {
-      txid: res.data.id,
-      version: res.data.version,
-      locktime: res.data.lockTime,
+      txid: res.id,
+      version: res.version,
+      locktime: res.lockTime,
       receipt: txReceipt,
       vin: txVin,
       vout: txVout,
-      confirmations: res.data.confirmations,
-      time: res.data.timestamp,
-      valueOut: res.data.outputValue,
-      valueIn: res.data.inputValue,
+      confirmations: res.confirmations,
+      time: res.timestamp,
+      valueOut: res.outputValue,
+      valueIn: res.inputValue,
       fees: fee,
-      blockhash: res.data.blockHash,
-      blockheight: res.data.blockHeight,
+      blockhash: res.blockHash,
+      blockheight: res.blockHeight,
       isqrc20Transfer: isqrc20
     }
 
@@ -276,14 +283,14 @@ export class Insight {
     address: string,
     pageNum: number = 0,
   ): Promise<Insight.IRawTransactions> {
-    const result = await this.axios.get(`/address/${address}/txs-detail?pageSize=10&page=${pageNum}`);
-     
-    let pages = Math.ceil(result.data.totalCount / 10);
+    const response = await this.fetchApi(`/address/${address}/txs-detail?pageSize=10&page=${pageNum}`);
+    const result = await response.json();
+    let pages = Math.ceil(result.totalCount / 10);
     let txList = [];
 
-    if(result.data.transactions.length > 0) {
-      for (let i = 0; i < result.data.transactions.length; i++) {
-        let res = result.data.transactions[i];
+    if(result.transactions.length > 0) {
+      for (let i = 0; i < result.transactions.length; i++) {
+        let res = result.transactions[i];
 
         let isqrc20 = false;
         let fee = 0;

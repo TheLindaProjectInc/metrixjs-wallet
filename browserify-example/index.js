@@ -6,7 +6,7 @@ async function main() {
   const password = "covfefe";
 
   //const wallet = network.fromMnemonic(mnemonic, password);
-  const wallet = network.fromPrivateKey("myprivkeystring");
+  const wallet = network.fromPrivateKey("myprivatekey");
 
   //console.log("mnemonic:", mnemonic);
   console.log("public address:", wallet.address);

@@ -2,9 +2,18 @@
   "name": "browserify-example",
   "version": "1.0.0",
   "main": "index.js",
+  "scripts": {
+    "build": "browserify index.js -p esmify > bundle.js"
+  },
   "license": "MIT",
   "dependencies": {
-    "browserify": "^16.5.1",
-    "metrixjs-wallet": "^0.2.3"
+    "browserify": "16.5.1",
+    "fetch-absolute": "^1.0.0",
+    "metrixjs-wallet": "^0.2.3",
+    "node-fetch": "2",
+    "tsify": "^5.0.4"
+  },
+  "devDependencies": {
+    "esmify": "^2.1.1"
   }
 }
