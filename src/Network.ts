@@ -31,7 +31,7 @@ export interface INetworkInfo {
 export const networksInfo: { [key: string]: INetworkInfo } = {
   [NetworkNames.MAINNET]: {
     name: NetworkNames.MAINNET,
-    messagePrefix: '\x15Metrix Signed Message:\n',
+    messagePrefix: '\x17Metrix Signed Message:\n',
     bech32: "mc",
     bip32: { public: 0x0488b21e, private: 0x0488ade4 },
     pubKeyHash: 0x32,
@@ -40,7 +40,7 @@ export const networksInfo: { [key: string]: INetworkInfo } = {
   },
   [NetworkNames.TESTNET]: {
     name: NetworkNames.TESTNET,
-    messagePrefix: '\x15Metrix Signed Message:\n',
+    messagePrefix: '\x17Metrix Signed Message:\n',
     bech32: 'tm',
     bip32: { public: 0x043587cf, private: 0x04358394 },
     pubKeyHash: 0x6e,
@@ -49,7 +49,7 @@ export const networksInfo: { [key: string]: INetworkInfo } = {
   },
   [NetworkNames.REGTEST]: {
     name: NetworkNames.REGTEST,
-    messagePrefix: '\x15Metrix Signed Message:\n',
+    messagePrefix: '\x17Metrix Signed Message:\n',
     bech32: "tb",
     bip32: { public: 70617039, private: 70615956 },
     pubKeyHash: 120,
