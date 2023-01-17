@@ -199,7 +199,7 @@ Alias for `fromWIF`.
 
 `fromWIF` constructs a wallet from private key (in [WIF](https://en.bitcoin.it/wiki/Wallet_import_format) format).
 
-Suppose you want to import the public address `qg3HYD8c4bAVLeEzA9t3Ken3Y3Mni1HZSS`. Use `metrix-cli` to dump the private key from wallet:
+Suppose you want to import the public address `mg3HYD8c4bAVLeEzA9t3Ken3Y3Mni1HZSS`. Use `metrix-cli` to dump the private key from wallet:
 
 ```
 metrix-cli dumpprivkey mg3HYD8c4bAVLeEzA9t3Ken3Y3Mni1HZSS
