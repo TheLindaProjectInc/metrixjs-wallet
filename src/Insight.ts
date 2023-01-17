@@ -149,7 +149,7 @@ export class Insight {
    * @param nblocks
    */
   public async estimateFee(nblocks: number = 6): Promise<any> {
-    const response = await this.fetchApi(`/info`);
+    const response = await this.fetchApi(`/info`)
     const res = await response.json();
 
 
