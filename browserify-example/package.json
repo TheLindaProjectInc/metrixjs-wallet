@@ -9,7 +9,7 @@
   "dependencies": {
     "browserify": "16.5.1",
     "fetch-absolute": "^1.0.0",
-    "metrixjs-wallet": "^0.2.3",
+    "metrixjs-wallet": "^0.3.1",
     "node-fetch": "2",
     "tsify": "^5.0.4"
   },
