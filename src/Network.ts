@@ -1,15 +1,20 @@
-import { HDNode, ECPair } from "bitcoinjs-lib"
+import * as ecc from '@bitcoinerlab/secp256k1';
 import * as bip38 from "bip38"
 import * as bip39 from "bip39"
 import * as wifEncoder from "wif"
 import * as bs58 from "bs58check"
+import * as bitcoin from "bitcoinjs-lib"
 
+
+import { BIP32Factory } from "bip32"
 import { Wallet } from "./Wallet"
 import { Insight } from "./Insight"
 import { validatePrivateKey } from "./index"
 import { IScryptParams, params } from "./scrypt"
 import { NetworkNames } from "./constants"
 export { NetworkNames } from "./constants"
+
+const bip32 = BIP32Factory(ecc)
 
 export interface INetworkInfo {
   name: string
@@ -70,13 +75,14 @@ export class Network {
    */
   public fromMnemonic(mnemonic: string, password?: string): Wallet {
     // if (bip39.validateMnemonic(mnemonic) == false) return false
-    const seedHex = bip39.mnemonicToSeedSync(mnemonic, password).toString('hex')
-    const hdNode = HDNode.fromSeedHex(seedHex, this.info)
+    const seedHex = bip39.mnemonicToSeedSync(mnemonic, password)
+    const hdNode = bip32.fromSeed(seedHex, this.info)
     const account = hdNode
       .deriveHardened(88)
       .deriveHardened(0)
       .deriveHardened(0)
-    const keyPair = account.keyPair
+    const keyPair = bitcoin.ECPair.fromWIF(account.toWIF(),this.info)
+    
 
     return new Wallet(keyPair, this.info)
   }
@@ -112,13 +118,13 @@ export class Network {
    * @param network
    */
   public fromMobile(mnemonic: string): Wallet[] {
-    const seedHex = bip39.mnemonicToSeedSync(mnemonic).toString('hex')
-    const hdNode = HDNode.fromSeedHex(seedHex, this.info)
+    const seedHex = bip39.mnemonicToSeedSync(mnemonic)
+    const hdNode = bip32.fromSeed(seedHex, this.info)
     const account = hdNode.deriveHardened(88).deriveHardened(0)
     const wallets: Wallet[] = []
     for (let i = 0; i < 10; i++) {
       const hdnode = account.deriveHardened(i)
-      const wallet = new Wallet(hdnode.keyPair, this.info)
+      const wallet = new Wallet(bitcoin.ECPair.fromWIF(hdnode.toWIF()), this.info)
 
       wallets.push(wallet)
     }
@@ -136,8 +142,7 @@ export class Network {
     if (!validatePrivateKey(wif)) {
       throw new Error("wif is invalid, it does not satisfy ECDSA")
     }
-    const keyPair = ECPair.fromWIF(wif, this.info)
-
+    const keyPair = bitcoin.ECPair.fromWIF(wif, this.info)
     return new Wallet(keyPair, this.info)
   }
 

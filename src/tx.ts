@@ -8,6 +8,8 @@ import { Buffer } from "buffer"
 
 import { OPS } from "./opcodes"
 
+import * as bitcoin from "bitcoinjs-lib"
+
 /**
  * Options for a payment transaction
  */
@@ -168,7 +170,7 @@ export function buildPubKeyHashTransaction(
 ) {
   ensureAmountInteger(amount)
 
-  const senderAddress = keyPair.getAddress()
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: keyPair.network}).address
 
   let {inputs, feeTotal: txfee} = selectTxs(utxos, amount, feeRate)
 
@@ -176,7 +178,7 @@ export function buildPubKeyHashTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.getNetwork())
+  const txb = new TransactionBuilder(keyPair.network)
 
   let vinSum = new BigNumber(0)
   for (const input of inputs) {
@@ -232,7 +234,7 @@ export function buildCreateContractTransaction(
     OPS.OP_CREATE,
   ])
 
-  const fromAddress = keyPair.getAddress()
+  const fromAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
   const amount = 0
   const amountTotal = new BigNumber(amount).plus(gasLimitFee).toNumber();
 
@@ -242,7 +244,7 @@ export function buildCreateContractTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.getNetwork())
+  const txb = new TransactionBuilder(keyPair.network)
 
   let totalValue = new BigNumber(0)
   for (const input of inputs) {
@@ -299,7 +301,7 @@ export function estimateSendToContractTransactionMaxValue(
   amount -= gasLimit * gasPrice
   ensureAmountInteger(amount)
 
-  const senderAddress = keyPair.getAddress()
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
 
   // excess gas will refund in the coinstake tx of the mined block
   const gasLimitFee = new BigNumber(gasLimit).times(gasPrice).toNumber()
@@ -352,7 +354,7 @@ export function buildSendToContractTransaction(
 
   ensureAmountInteger(amount)
 
-  const senderAddress = keyPair.getAddress()
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
 
   // excess gas will refund in the coinstake tx of the mined block
   const gasLimitFee = new BigNumber(gasLimit).times(gasPrice).toNumber()
@@ -372,7 +374,7 @@ export function buildSendToContractTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.getNetwork())
+  const txb = new TransactionBuilder(keyPair.network)
 
   // add inputs to txb
   let vinSum = new BigNumber(0)
