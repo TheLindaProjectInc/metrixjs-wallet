@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "start-services": "./scripts/start-services.sh",
-    "build": "tsc -w",
+    "build": "tsc",
     "webpack-build": "webpack --config webpack.config.js",
     "clean": "docker-compose stop && docker-compose rm -f && rm -rf ./data && rm -rf lib",
     "test": "tsc && mocha lib/**/*.test.js",
