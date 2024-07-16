@@ -42,7 +42,7 @@
     "bip38": "^3.1.1",
     "bip39": "^3.0.3",
     "bitcoinjs-lib": "^4.0.5",
-    "bs58check": "^2.1.2",
+    "bs58check": "^4.0.0",
     "buffer": "^6.0.3",
     "coinselect": "^3.1.11",
     "ecpair": "^2.1.0",
