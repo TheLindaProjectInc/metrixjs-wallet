@@ -1,7 +1,10 @@
 import * as bip38 from "bip38"
 import * as wif from "wif"
+import * as ecc from '@bitcoinerlab/secp256k1';
+import * as bitcoin from "bitcoinjs-lib"
 
-import { ECPair, HDNode } from "bitcoinjs-lib"
+import BIP32Factory from 'bip32'
+import { BIP32Interface } from "bip32"
 
 import { INetworkInfo } from "./Network"
 import { Insight } from "./Insight"
@@ -26,13 +29,15 @@ import { params, IScryptParams } from "./scrypt"
  */
 const defaultTxFeePerByte = Math.ceil((10 * 1e8) / 1024)
 
+const bip32 = BIP32Factory(ecc)
+
 export class Wallet {
   public address: string
   private insight: Insight
 
-  constructor(public keyPair: ECPair, public network: INetworkInfo) {
-    this.address = this.keyPair.getAddress()
-    this.insight = Insight.forNetwork(this.network)
+  constructor(public keyPair: bitcoin.ECPair, public network: INetworkInfo) {
+    this.address = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: network}).address
+    this.insight = Insight.forNetwork(network)
   }
 
   public toWIF(): string {
@@ -283,9 +288,9 @@ export class Wallet {
   /**
    * The BIP32 HDNode, which may be used to derive new key pairs
    */
-  public hdnode(): HDNode {
-    const seed = this.keyPair.getPublicKeyBuffer()
-    const hdnode = HDNode.fromSeedBuffer(seed, this.network)!
+  public hdnode(): BIP32Interface {
+    const seed = this.keyPair.publicKey
+    const hdnode = bip32.fromSeed(seed, this.network)!
     return hdnode
   }
 
@@ -294,8 +299,8 @@ export class Wallet {
    * @param n The index of the child wallet to derive.
    */
   public deriveChildWallet(n = 0): Wallet {
-    const childKeyPair = this.hdnode().deriveHardened(n).keyPair
-    return new Wallet(childKeyPair, this.network)
+    const childKeyWIF = this.hdnode().deriveHardened(n).toWIF()
+    return new Wallet(bitcoin.ECPair.fromWIF(childKeyWIF), this.network)
   }
 
   public async contractCreate(

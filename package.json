@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "start-services": "./scripts/start-services.sh",
-    "build": "tsc -w",
+    "build": "tsc",
     "webpack-build": "webpack --config webpack.config.js",
     "clean": "docker-compose stop && docker-compose rm -f && rm -rf ./data && rm -rf lib",
     "test": "tsc && mocha lib/**/*.test.js",
@@ -21,7 +21,6 @@
   },
   "devDependencies": {
     "@types/big.js": "^6.1.1",
-    "@types/bitcoinjs-lib": "^3.3.1",
     "@types/chai": "^4.2.16",
     "@types/mocha": "^8.2.2",
     "@types/node": "^14.14.41",
@@ -33,21 +32,26 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@bitcoinerlab/secp256k1": "^1.1.1",
     "@types/bip38": "^2.0.1",
+    "@types/bitcoinjs-lib": "^4.0.1",
     "@types/secp256k1": "^4.0.2",
     "big.js": "^6.1.1",
     "bignumber.js": "^9.0.1",
+    "bip32": "^4.0.0",
     "bip38": "^3.1.1",
     "bip39": "^3.0.3",
-    "bitcoinjs-lib": "^3.3.1",
+    "bitcoinjs-lib": "^4.0.5",
     "bs58check": "^2.1.2",
     "buffer": "^6.0.3",
     "coinselect": "^3.1.11",
+    "ecpair": "^2.1.0",
     "elliptic": "^6.5.4",
     "fetch-absolute": "^1.0.0",
     "hash.js": "^1.1.7",
     "node-fetch": "2",
     "scryptsy": "^2.1.0",
-    "secp256k1": "^4.0.2"
+    "secp256k1": "^4.0.2",
+    "tiny-secp256k1": "^2.2.3"
   }
 }

@@ -1,7 +1,7 @@
 const { networks, generateMnemonic, Insight } = require("metrixjs-wallet");
 
 async function main() {
-  const network = networks.testnet;
+  const network = networks.mainnet;
   const mnemonic = generateMnemonic();
   const password = "covfefe";
 
