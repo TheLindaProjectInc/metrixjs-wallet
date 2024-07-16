@@ -1,4 +1,4 @@
-import { ECPair, TransactionBuilder, script as BTCScript } from "bitcoinjs-lib"
+import {ECPair, ECPairInterface, TransactionBuilder, script as BTCScript } from "bitcoinjs-lib"
 
 import { encode as encodeCScriptInt } from "bitcoinjs-lib/src/script_number"
 
@@ -163,14 +163,14 @@ export function estimatePubKeyHashTransactionMaxSend(
  */
 export function buildPubKeyHashTransaction(
   utxos: IUTXO[],
-  keyPair: ECPair,
+  keyPair: ECPairInterface,
   to: string,
   amount: number,
   feeRate: number,
 ) {
   ensureAmountInteger(amount)
 
-  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: keyPair.network}).address
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: keyPair.network}).address as string
 
   let {inputs, feeTotal: txfee} = selectTxs(utxos, amount, feeRate)
 
@@ -217,7 +217,7 @@ export function buildPubKeyHashTransaction(
  */
 export function buildCreateContractTransaction(
   utxos: IUTXO[],
-  keyPair: ECPair,
+  keyPair: ECPairInterface,
   code: string,
   feeRate: number,
   opts: IContractCreateTXOptions = {},
@@ -234,7 +234,7 @@ export function buildCreateContractTransaction(
     OPS.OP_CREATE,
   ])
 
-  const fromAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
+  const fromAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address as string
   const amount = 0
   const amountTotal = new BigNumber(amount).plus(gasLimitFee).toNumber();
 
@@ -282,7 +282,7 @@ const defaultContractSendTxOptions = {
 
 export function estimateSendToContractTransactionMaxValue(
   utxos: IUTXO[],
-  keyPair: ECPair,
+  keyPair: ECPairInterface,
   contractAddress: string,
   encodedData: string,
   feeRate: number,
@@ -301,7 +301,7 @@ export function estimateSendToContractTransactionMaxValue(
   amount -= gasLimit * gasPrice
   ensureAmountInteger(amount)
 
-  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address as string
 
   // excess gas will refund in the coinstake tx of the mined block
   const gasLimitFee = new BigNumber(gasLimit).times(gasPrice).toNumber()
@@ -339,7 +339,7 @@ export function estimateSendToContractTransactionMaxValue(
  */
 export function buildSendToContractTransaction(
   utxos: IUTXO[],
-  keyPair: ECPair,
+  keyPair: ECPairInterface,
   contractAddress: string,
   encodedData: string,
   feeRate: number,
@@ -354,7 +354,7 @@ export function buildSendToContractTransaction(
 
   ensureAmountInteger(amount)
 
-  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: keyPair.network}).address as string
 
   // excess gas will refund in the coinstake tx of the mined block
   const gasLimitFee = new BigNumber(gasLimit).times(gasPrice).toNumber()

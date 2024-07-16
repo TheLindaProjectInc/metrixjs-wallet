@@ -1,4 +1,4 @@
-import { ECPair } from "bitcoinjs-lib";
+import { ECPairInterface } from "bitcoinjs-lib";
 /**
  * Options for a payment transaction
  */
@@ -65,7 +65,7 @@ export declare function estimatePubKeyHashTransactionMaxSend(utxos: IUTXO[], to:
  * @param feeRate
  * @param utxoList
  */
-export declare function buildPubKeyHashTransaction(utxos: IUTXO[], keyPair: ECPair, to: string, amount: number, feeRate: number): string;
+export declare function buildPubKeyHashTransaction(utxos: IUTXO[], keyPair: ECPairInterface, to: string, amount: number, feeRate: number): string;
 /**
  * Build a create-contract transaction
  *
@@ -75,8 +75,8 @@ export declare function buildPubKeyHashTransaction(utxos: IUTXO[], keyPair: ECPa
  * @param utxoList
  * @returns the built tx
  */
-export declare function buildCreateContractTransaction(utxos: IUTXO[], keyPair: ECPair, code: string, feeRate: number, opts?: IContractCreateTXOptions): string;
-export declare function estimateSendToContractTransactionMaxValue(utxos: IUTXO[], keyPair: ECPair, contractAddress: string, encodedData: string, feeRate: number, opts?: IContractSendTXOptions): number;
+export declare function buildCreateContractTransaction(utxos: IUTXO[], keyPair: ECPairInterface, code: string, feeRate: number, opts?: IContractCreateTXOptions): string;
+export declare function estimateSendToContractTransactionMaxValue(utxos: IUTXO[], keyPair: ECPairInterface, contractAddress: string, encodedData: string, feeRate: number, opts?: IContractSendTXOptions): number;
 /**
  * Build a send-to-contract transaction
  *
@@ -87,4 +87,4 @@ export declare function estimateSendToContractTransactionMaxValue(utxos: IUTXO[]
  * @param utxoList
  * @returns the built tx
  */
-export declare function buildSendToContractTransaction(utxos: IUTXO[], keyPair: ECPair, contractAddress: string, encodedData: string, feeRate: number, opts?: IContractSendTXOptions): string;
+export declare function buildSendToContractTransaction(utxos: IUTXO[], keyPair: ECPairInterface, contractAddress: string, encodedData: string, feeRate: number, opts?: IContractSendTXOptions): string;

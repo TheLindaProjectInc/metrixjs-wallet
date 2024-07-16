@@ -59,13 +59,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/bitcoinjs-lib@^4.0.1":
-  "integrity" "sha512-w5BzfIwdHhEB1kM4pA9AGYbS1U+YfA3DUJ6CSUZgp2DySECA47FH9J1wngLjkQaJHnRfLXoSAZrlPTK8rKmwXw=="
-  "resolved" "https://registry.npmjs.org/@types/bitcoinjs-lib/-/bitcoinjs-lib-4.0.1.tgz"
-  "version" "4.0.1"
-  dependencies:
-    "@types/node" "*"
-
 "@types/chai@^4.2.16":
   "integrity" "sha512-vI5iOAsez9+roLS3M3+Xx7w+WRuDtSmF8bQkrbcIJ2sC1PcDgVoA0WGpa+bIrJ+y8zqY2oi//fUctkxtIcXJCw=="
   "resolved" "https://registry.npmjs.org/@types/chai/-/chai-4.2.16.tgz"
@@ -84,10 +77,20 @@
     "@types/node" "*"
     "form-data" "^3.0.0"
 
-"@types/node@*", "@types/node@^14.14.41":
+"@types/node@*":
+  "integrity" "sha512-CTUtLb6WqCCgp6P59QintjHWqzf4VL1uPA27bipLAPxFqrtK1gEYllePzTICGqQ8rYsCbpnsNypXjjDzGAAjEQ=="
+  "resolved" "https://registry.npmjs.org/@types/node/-/node-9.4.6.tgz"
+  "version" "9.4.6"
+
+"@types/node@^14.14.41":
   "integrity" "sha512-dueRKfaJL4RTtSa7bWeTK1M+VH+Gns73oCgzvYfHZywRCoPSd8EkXBL0mZ9unPTveBn+D9phZBaxuzpwjWkW0g=="
   "resolved" "https://registry.npmjs.org/@types/node/-/node-14.14.41.tgz"
   "version" "14.14.41"
+
+"@types/node@10.12.18":
+  "integrity" "sha512-fh+pAqt4xRzPfqA6eh3Z2y6fyZavRIumvjhaCL753+TVkGKGhpPeyrJG2JftD0T9q4GF00KjefsQ+PQNDdWQaQ=="
+  "resolved" "https://registry.npmjs.org/@types/node/-/node-10.12.18.tgz"
+  "version" "10.12.18"
 
 "@types/node@11.11.6":
   "integrity" "sha512-Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ=="
@@ -214,15 +217,16 @@
   dependencies:
     "file-uri-to-path" "1.0.0"
 
-"bip32@^1.0.4":
-  "integrity" "sha512-8T21eLWylZETolyqCPgia+MNp+kY37zFr7PTFDTPObHeNi9JlfG4qGIh8WzerIJidtwoK+NsWq2I5i66YfHoIw=="
-  "resolved" "https://registry.npmjs.org/bip32/-/bip32-1.0.4.tgz"
-  "version" "1.0.4"
+"bip32@^2.0.3":
+  "integrity" "sha512-HpV5OMLLGTjSVblmrtYRfFFKuQB+GArM0+XP8HGWfJ5vxYBqo+DesvJwOdC2WJ3bCkZShGf0QIfoIpeomVzVdA=="
+  "resolved" "https://registry.npmjs.org/bip32/-/bip32-2.0.6.tgz"
+  "version" "2.0.6"
   dependencies:
+    "@types/node" "10.12.18"
     "bs58check" "^2.1.1"
     "create-hash" "^1.2.0"
     "create-hmac" "^1.1.7"
-    "tiny-secp256k1" "^1.0.0"
+    "tiny-secp256k1" "^1.1.3"
     "typeforce" "^1.11.5"
     "wif" "^2.0.6"
 
@@ -272,13 +276,14 @@
   "resolved" "https://registry.npmjs.org/bitcoin-ops/-/bitcoin-ops-1.4.1.tgz"
   "version" "1.4.1"
 
-"bitcoinjs-lib@^4.0.5":
-  "integrity" "sha512-gYs7K2hiY4Xb96J8AIF+Rx+hqbwjVlp5Zt6L6AnHOdzfe/2tODdmDxsEytnaxVCdhOUg0JnsGpl+KowBpGLxtA=="
-  "resolved" "https://registry.npmjs.org/bitcoinjs-lib/-/bitcoinjs-lib-4.0.5.tgz"
-  "version" "4.0.5"
+"bitcoinjs-lib@^5.0.5":
+  "integrity" "sha512-BUimtgWFoWmoXQ74XxlQH8y9Vzi8ypFiWErDkP+VBe0nGcU3bKAJbNhzhZOO1/QAfyelfNvxVV5Cj189XinmPg=="
+  "resolved" "https://registry.npmjs.org/bitcoinjs-lib/-/bitcoinjs-lib-5.0.5.tgz"
+  "version" "5.0.5"
   dependencies:
+    "@types/node" "10.12.18"
     "bech32" "^1.1.2"
-    "bip32" "^1.0.4"
+    "bip32" "^2.0.3"
     "bip66" "^1.1.0"
     "bitcoin-ops" "^1.4.0"
     "bs58check" "^2.0.0"
@@ -287,8 +292,7 @@
     "merkle-lib" "^2.0.10"
     "pushdata-bitcoin" "^1.0.1"
     "randombytes" "^2.0.1"
-    "safe-buffer" "^5.1.1"
-    "tiny-secp256k1" "^1.0.0"
+    "tiny-secp256k1" "^1.1.1"
     "typeforce" "^1.11.3"
     "varuint-bitcoin" "^1.0.4"
     "wif" "^2.0.1"
@@ -342,16 +346,7 @@
   dependencies:
     "base-x" "^3.0.2"
 
-"bs58check@^2.0.0", "bs58check@^2.1.1":
-  "integrity" "sha512-0TS1jicxdU09dwJMNZtVAfzPi6Q6QeN0pM1Fkzrjn+XYHvzMKPU3pHVpva+769iNVSfIYWf7LJ6WR+BuuMf8cA=="
-  "resolved" "https://registry.npmjs.org/bs58check/-/bs58check-2.1.2.tgz"
-  "version" "2.1.2"
-  dependencies:
-    "bs58" "^4.0.0"
-    "create-hash" "^1.1.0"
-    "safe-buffer" "^5.1.2"
-
-"bs58check@^2.1.2":
+"bs58check@^2.0.0", "bs58check@^2.1.1", "bs58check@^2.1.2":
   "integrity" "sha512-0TS1jicxdU09dwJMNZtVAfzPi6Q6QeN0pM1Fkzrjn+XYHvzMKPU3pHVpva+769iNVSfIYWf7LJ6WR+BuuMf8cA=="
   "resolved" "https://registry.npmjs.org/bs58check/-/bs58check-2.1.2.tgz"
   "version" "2.1.2"
@@ -1280,7 +1275,7 @@
   dependencies:
     "has-flag" "^4.0.0"
 
-"tiny-secp256k1@^1.0.0":
+"tiny-secp256k1@^1.1.1", "tiny-secp256k1@^1.1.3":
   "integrity" "sha512-FmqJZGduTyvsr2cF3375fqGHUovSwDi/QytexX1Se4BPuPZpTE5Ftp5fg+EFSuEf3lhZqgCRjEG3ydUQ/aNiwA=="
   "resolved" "https://registry.npmjs.org/tiny-secp256k1/-/tiny-secp256k1-1.1.6.tgz"
   "version" "1.1.6"

@@ -1,15 +1,15 @@
-import * as bitcoin from "bitcoinjs-lib";
+import { ECPairInterface } from 'bitcoinjs-lib';
 import { BIP32Interface } from "bip32";
 import { INetworkInfo } from "./Network";
 import { Insight } from "./Insight";
 import { IUTXO, IContractSendTXOptions, ISendTxOptions, IContractCreateTXOptions } from "./tx";
 import { IScryptParams } from "./scrypt";
 export declare class Wallet {
-    keyPair: bitcoin.ECPair;
+    keyPair: ECPairInterface;
     network: INetworkInfo;
     address: string;
     private insight;
-    constructor(keyPair: bitcoin.ECPair, network: INetworkInfo);
+    constructor(keyPair: ECPairInterface, network: INetworkInfo);
     toWIF(): string;
     /**
      * Get basic information about the wallet address.
