@@ -1,4 +1,4 @@
-[![build](https://img.shields.io/github/actions/workflow/status/TheLindaProjectInc/metrixjs-wallet/node.js.yml?branch=master)](https://github.com/TheLindaProjectInc/metrixjs-wallet/actions/workflows/node.js.yml)****
+[![build](https://img.shields.io/github/actions/workflow/status/TheLindaProjectInc/metrixjs-wallet/node.js.yml?branch=master)](https://github.com/TheLindaProjectInc/metrixjs-wallet/actions/workflows/node.js.yml)
 
 # MetrixJS Wallet
 
