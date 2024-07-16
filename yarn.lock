@@ -217,7 +217,12 @@
   dependencies:
     "file-uri-to-path" "1.0.0"
 
-"bip32@^2.0.3":
+"bip174@^2.0.1":
+  "integrity" "sha512-i3X26uKJOkDTAalYAp0Er+qGMDhrbbh2o93/xiPyAN2s25KrClSpe3VXo/7mNJoqA5qfko8rLS2l3RWZgYmjKQ=="
+  "resolved" "https://registry.npmjs.org/bip174/-/bip174-2.0.1.tgz"
+  "version" "2.0.1"
+
+"bip32@^2.0.4":
   "integrity" "sha512-HpV5OMLLGTjSVblmrtYRfFFKuQB+GArM0+XP8HGWfJ5vxYBqo+DesvJwOdC2WJ3bCkZShGf0QIfoIpeomVzVdA=="
   "resolved" "https://registry.npmjs.org/bip32/-/bip32-2.0.6.tgz"
   "version" "2.0.6"
@@ -276,14 +281,14 @@
   "resolved" "https://registry.npmjs.org/bitcoin-ops/-/bitcoin-ops-1.4.1.tgz"
   "version" "1.4.1"
 
-"bitcoinjs-lib@^5.0.5":
-  "integrity" "sha512-BUimtgWFoWmoXQ74XxlQH8y9Vzi8ypFiWErDkP+VBe0nGcU3bKAJbNhzhZOO1/QAfyelfNvxVV5Cj189XinmPg=="
-  "resolved" "https://registry.npmjs.org/bitcoinjs-lib/-/bitcoinjs-lib-5.0.5.tgz"
-  "version" "5.0.5"
+"bitcoinjs-lib@^5.2.0":
+  "integrity" "sha512-5DcLxGUDejgNBYcieMIUfjORtUeNWl828VWLHJGVKZCb4zIS1oOySTUr0LGmcqJBQgTBz3bGbRQla4FgrdQEIQ=="
+  "resolved" "https://registry.npmjs.org/bitcoinjs-lib/-/bitcoinjs-lib-5.2.0.tgz"
+  "version" "5.2.0"
   dependencies:
-    "@types/node" "10.12.18"
     "bech32" "^1.1.2"
-    "bip32" "^2.0.3"
+    "bip174" "^2.0.1"
+    "bip32" "^2.0.4"
     "bip66" "^1.1.0"
     "bitcoin-ops" "^1.4.0"
     "bs58check" "^2.0.0"

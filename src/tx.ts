@@ -1,4 +1,4 @@
-import {ECPair, ECPairInterface, TransactionBuilder, script as BTCScript } from "bitcoinjs-lib"
+import { ECPairInterface, TransactionBuilder, script as BTCScript } from "bitcoinjs-lib"
 
 import { encode as encodeCScriptInt } from "bitcoinjs-lib/src/script_number"
 
