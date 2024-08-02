@@ -204,12 +204,9 @@ export function buildPubKeyHashTransaction(
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    let pos = 0;
-    if(inputs[i].hash === txb.txInputs[i].hash.toString('hex')) {
-      pos = inputs[i].pos;
-    }
-    txb.signInput(pos, keyPair)
-    txb.validateSignaturesOfInput(pos)
+    let index = inputs[i].pos
+    txb.signInput(index, keyPair)
+    txb.validateSignaturesOfInput(index)
   }
   txb.finalizeAllInputs();
   return txb.extractTransaction().toHex()
@@ -275,12 +272,9 @@ export function buildCreateContractTransaction(
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    let pos = 0;
-    if(inputs[i].hash === txb.txInputs[i].hash.toString('hex')) {
-      pos = inputs[i].pos;
-    }
-    txb.signInput(pos, keyPair)
-    txb.validateSignaturesOfInput(pos)
+    let index = inputs[i].pos
+    txb.signInput(index, keyPair)
+    txb.validateSignaturesOfInput(index)
   }
   txb.finalizeAllInputs();
   return txb.extractTransaction().toHex();
@@ -413,12 +407,9 @@ export function buildSendToContractTransaction(
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    let pos = 0;
-    if(inputs[i].hash === txb.txInputs[i].hash.toString('hex')) {
-      pos = inputs[i].pos;
-    }
-    txb.signInput(pos, keyPair)
-    txb.validateSignaturesOfInput(pos)
+    let index = inputs[i].pos
+    txb.signInput(index, keyPair)
+    txb.validateSignaturesOfInput(index)
   }
   txb.finalizeAllInputs();
   return txb.extractTransaction().toHex();
