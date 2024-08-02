@@ -1,4 +1,6 @@
-import { ECPairInterface, TransactionBuilder, script as BTCScript } from "bitcoinjs-lib"
+import { TransactionBuilder, script as BTCScript } from "bitcoinjs-lib"
+
+import { bip32, ECPair, ECPairInterface, networks, payments, Psbt, Signer, SignerAsync } from "bitcoinjs-lib"
 
 import { encode as encodeCScriptInt } from "bitcoinjs-lib/src/script_number"
 
@@ -178,11 +180,12 @@ export function buildPubKeyHashTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.network)
+  //const txb = new TransactionBuilder(keyPair.network)
+  const txb = new Psbt({network: keyPair.network})
 
   let vinSum = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput(input.hash, input.pos)
+    txb.addInput({hash: input.hash, index: input.pos})
     vinSum = vinSum.plus(input.value)
   }
 
@@ -190,20 +193,22 @@ export function buildPubKeyHashTransaction(
     amount = new BigNumber(amount).minus(txfee).toNumber();
   }
 
-  txb.addOutput(to, amount)
+  txb.addOutput({script: Buffer.from(to, 'hex'), value: amount})
 
   const change = vinSum
     .minus(txfee)
     .minus(amount)
     .toNumber()
   if (change > 0) {
-    txb.addOutput(senderAddress, change)
+    txb.addOutput({script: Buffer.from(senderAddress, 'hex'), value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, keyPair)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
-  return txb.build().toHex()
+  txb.finalizeAllInputs();
+  return txb.extractTransaction().toHex()
 }
 
 /**
@@ -244,16 +249,17 @@ export function buildCreateContractTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.network)
+  //const txb = new TransactionBuilder(keyPair.network)
+  const txb = new Psbt({network: keyPair.network})
 
   let totalValue = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput(input.hash, input.pos)
+    txb.addInput({hash: input.hash, index: input.pos})
     totalValue = totalValue.plus(input.value)
   }
 
   // create-contract output
-  txb.addOutput(createContractScript, 0)
+  txb.addOutput({script: createContractScript, value: 0})
 
   const change = totalValue
     .minus(txfee)
@@ -261,14 +267,15 @@ export function buildCreateContractTransaction(
     .toNumber()
 
   if (change > 0) {
-    txb.addOutput(fromAddress, change)
+    txb.addOutput({script: Buffer.from(fromAddress, 'hex'), value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, keyPair)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
-
-  return txb.build().toHex()
+  txb.finalizeAllInputs();
+  return txb.extractTransaction().toHex();
 }
 
 const defaultContractSendTxOptions = {
@@ -374,17 +381,18 @@ export function buildSendToContractTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.network)
+  //const txb = new TransactionBuilder(keyPair.network)
+  const txb = new Psbt({network: keyPair.network})
 
   // add inputs to txb
   let vinSum = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput(input.hash, input.pos)
+    txb.addInput({hash: input.hash, index: input.pos})
     vinSum = vinSum.plus(input.value)
   }
 
   // send-to-contract output
-  txb.addOutput(opcallScript, amount)
+  txb.addOutput({script: opcallScript, value: amount})
 
   // change output (in satoshi)
   const change = vinSum
@@ -393,14 +401,15 @@ export function buildSendToContractTransaction(
     .minus(amount)
     .toNumber()
   if (change > 0) {
-    txb.addOutput(senderAddress, change)
+    txb.addOutput({script: Buffer.from(senderAddress, 'hex'), value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, keyPair)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
-
-  return txb.build().toHex()
+  txb.finalizeAllInputs();
+  return txb.extractTransaction().toHex();
 }
 
 // The prevalent network fee is 10 per KB. If set to 100 times of norm, assume error.
