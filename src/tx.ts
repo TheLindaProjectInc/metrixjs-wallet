@@ -185,7 +185,11 @@ export function buildPubKeyHashTransaction(
 
   let vinSum = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput({hash: input.hash, index: input.pos})
+    txb.addInput({
+      hash: input.hash,
+      index: input.pos,
+      nonWitnessUtxo: Buffer.from(input.rawtx, 'hex')
+    })
     vinSum = vinSum.plus(input.value)
   }
 
@@ -193,23 +197,22 @@ export function buildPubKeyHashTransaction(
     amount = new BigNumber(amount).minus(txfee).toNumber();
   }
 
-  txb.addOutput({script: Buffer.from(to, 'hex'), value: amount})
+  txb.addOutput({address: to, value: amount})
 
   const change = vinSum
     .minus(txfee)
     .minus(amount)
     .toNumber()
   if (change > 0) {
-    txb.addOutput({script: Buffer.from(senderAddress, 'hex'), value: change})
+    txb.addOutput({address: senderAddress, value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    let index = inputs[i].pos
-    txb.signInput(index, keyPair)
-    txb.validateSignaturesOfInput(index)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
   txb.finalizeAllInputs();
-  return txb.extractTransaction().toHex()
+  return txb.extractTransaction(true).toHex()
 }
 
 /**
@@ -255,7 +258,11 @@ export function buildCreateContractTransaction(
 
   let totalValue = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput({hash: input.hash, index: input.pos})
+    txb.addInput({
+      hash: input.hash,
+      index: input.pos,
+      nonWitnessUtxo: Buffer.from(input.rawtx, 'hex')
+    })
     totalValue = totalValue.plus(input.value)
   }
 
@@ -268,16 +275,15 @@ export function buildCreateContractTransaction(
     .toNumber()
 
   if (change > 0) {
-    txb.addOutput({script: Buffer.from(fromAddress, 'hex'), value: change})
+    txb.addOutput({address: fromAddress, value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    let index = inputs[i].pos
-    txb.signInput(index, keyPair)
-    txb.validateSignaturesOfInput(index)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
   txb.finalizeAllInputs();
-  return txb.extractTransaction().toHex();
+  return txb.extractTransaction(true).toHex();
 }
 
 const defaultContractSendTxOptions = {
@@ -389,7 +395,11 @@ export function buildSendToContractTransaction(
   // add inputs to txb
   let vinSum = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput({hash: input.hash, index: input.pos})
+    txb.addInput({
+      hash: input.hash,
+      index: input.pos,
+      nonWitnessUtxo: Buffer.from(input.rawtx, 'hex')
+    });
     vinSum = vinSum.plus(input.value)
   }
 
@@ -403,16 +413,15 @@ export function buildSendToContractTransaction(
     .minus(amount)
     .toNumber()
   if (change > 0) {
-    txb.addOutput({script: Buffer.from(senderAddress, 'hex'), value: change})
+    txb.addOutput({address: senderAddress, value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    let index = inputs[i].pos
-    txb.signInput(index, keyPair)
-    txb.validateSignaturesOfInput(index)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
   txb.finalizeAllInputs();
-  return txb.extractTransaction().toHex();
+  return txb.extractTransaction(true).toHex();
 }
 
 // The prevalent network fee is 10 per KB. If set to 100 times of norm, assume error.

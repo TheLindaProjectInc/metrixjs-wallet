@@ -10,6 +10,7 @@ export declare class Insight {
     listUTXOs(address: string): Promise<Insight.IUTXO[]>;
     getInfo(address: string): Promise<Insight.IGetInfo>;
     sendRawTx(rawtx: string): Promise<Insight.ISendRawTxResult>;
+    GetRawTx(tx: string): Promise<Insight.IGetRawTxResult>;
     contractCall(address: string, encodedData: string): Promise<Insight.IContractCall>;
     /**
      * Estimate the fee per KB of txdata, in satoshi. Returns -1 if no estimate is
@@ -42,6 +43,9 @@ export declare namespace Insight {
     interface ISendRawTxResult {
         txid: string;
     }
+    interface IGetRawTxResult {
+        rawtx: string;
+    }
     interface IUTXO {
         address: string;
         txid: string;
@@ -55,6 +59,7 @@ export declare namespace Insight {
         isStake: boolean;
         height: number;
         confirmations: number;
+        rawtx: string;
     }
     interface IExecutionResult {
         gasUsed: number;
