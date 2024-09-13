@@ -57,7 +57,7 @@ export class Insight {
     const res  = await response.json();
     let result: Insight.IUTXO[] = [];
     if(res.length > 0) {
-      res.forEach((utxo: {transactionId: string; outputIndex: number; scriptPubKey: string; value: string; isStake: boolean; blockHeight: number; confirmations: number }) => {
+      res.forEach((utxo: {transactionId: string; outputIndex: number; scriptPubKey: string; value: string; isStake: boolean; blockHeight: number; confirmations: number, rawtx: string }) => {
         result.push({
           address: address,
           txid: utxo.transactionId,
@@ -74,6 +74,7 @@ export class Insight {
           isStake: utxo.isStake,
           height: utxo.blockHeight,
           confirmations: utxo.confirmations,
+          rawtx: utxo.rawtx
           })
       });
       return result;
@@ -124,6 +125,19 @@ export class Insight {
     const res = await response.json();
     if (res.status === 0) {
       return {txid: res.id}
+    }
+    return res
+  }
+
+  public async GetRawTx(tx: string): Promise<Insight.IGetRawTxResult> {
+    const response = await this.fetchApi(`/raw-tx/${tx}`, { 
+      method: 'get',
+      headers: { "Content-Type": "application/json" }
+    });
+    const res = await response.json();
+    console.log(res);
+    if (res.status === 0) {
+      return {rawtx: res.id}
     }
     return res
   }
@@ -380,6 +394,9 @@ export namespace Insight {
     txid: string
   }
 
+  export interface IGetRawTxResult {
+    rawtx: string
+  }
   export interface IUTXO {
     address: string
     txid: string
@@ -396,6 +413,7 @@ export namespace Insight {
     isStake: boolean
     height: number
     confirmations: number
+    rawtx: string
   }
 
   export interface IExecutionResult {

@@ -3,6 +3,8 @@ import * as wif from "wif"
 import * as ecc from '@bitcoinerlab/secp256k1';
 import * as bitcoin from "bitcoinjs-lib"
 
+import { ECPairInterface } from 'bitcoinjs-lib'
+
 import BIP32Factory from 'bip32'
 import { BIP32Interface } from "bip32"
 
@@ -35,8 +37,8 @@ export class Wallet {
   public address: string
   private insight: Insight
 
-  constructor(public keyPair: bitcoin.ECPair, public network: INetworkInfo) {
-    this.address = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: network}).address
+  constructor(public keyPair: ECPairInterface, public network: INetworkInfo) {
+    this.address = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: network}).address as string
     this.insight = Insight.forNetwork(network)
   }
 

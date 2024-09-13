@@ -1,4 +1,6 @@
-import { ECPair, TransactionBuilder, script as BTCScript } from "bitcoinjs-lib"
+import { TransactionBuilder, script as BTCScript } from "bitcoinjs-lib"
+
+import { bip32, ECPair, ECPairInterface, networks, payments, Psbt, Signer, SignerAsync } from "bitcoinjs-lib"
 
 import { encode as encodeCScriptInt } from "bitcoinjs-lib/src/script_number"
 
@@ -163,14 +165,14 @@ export function estimatePubKeyHashTransactionMaxSend(
  */
 export function buildPubKeyHashTransaction(
   utxos: IUTXO[],
-  keyPair: ECPair,
+  keyPair: ECPairInterface,
   to: string,
   amount: number,
   feeRate: number,
 ) {
   ensureAmountInteger(amount)
 
-  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: keyPair.network}).address
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: keyPair.network}).address as string
 
   let {inputs, feeTotal: txfee} = selectTxs(utxos, amount, feeRate)
 
@@ -178,11 +180,15 @@ export function buildPubKeyHashTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.network)
+  const txb = new Psbt({network: keyPair.network})
 
   let vinSum = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput(input.hash, input.pos)
+    txb.addInput({
+      hash: input.hash,
+      index: input.pos,
+      nonWitnessUtxo: Buffer.from(input.rawtx, 'hex')
+    })
     vinSum = vinSum.plus(input.value)
   }
 
@@ -190,20 +196,22 @@ export function buildPubKeyHashTransaction(
     amount = new BigNumber(amount).minus(txfee).toNumber();
   }
 
-  txb.addOutput(to, amount)
+  txb.addOutput({address: to, value: amount})
 
   const change = vinSum
     .minus(txfee)
     .minus(amount)
     .toNumber()
   if (change > 0) {
-    txb.addOutput(senderAddress, change)
+    txb.addOutput({address: senderAddress, value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, keyPair)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
-  return txb.build().toHex()
+  txb.finalizeAllInputs();
+  return txb.extractTransaction(true).toHex()
 }
 
 /**
@@ -217,7 +225,7 @@ export function buildPubKeyHashTransaction(
  */
 export function buildCreateContractTransaction(
   utxos: IUTXO[],
-  keyPair: ECPair,
+  keyPair: ECPairInterface,
   code: string,
   feeRate: number,
   opts: IContractCreateTXOptions = {},
@@ -234,7 +242,7 @@ export function buildCreateContractTransaction(
     OPS.OP_CREATE,
   ])
 
-  const fromAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
+  const fromAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address as string
   const amount = 0
   const amountTotal = new BigNumber(amount).plus(gasLimitFee).toNumber();
 
@@ -244,16 +252,20 @@ export function buildCreateContractTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.network)
+  const txb = new Psbt({network: keyPair.network})
 
   let totalValue = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput(input.hash, input.pos)
+    txb.addInput({
+      hash: input.hash,
+      index: input.pos,
+      nonWitnessUtxo: Buffer.from(input.rawtx, 'hex')
+    })
     totalValue = totalValue.plus(input.value)
   }
 
   // create-contract output
-  txb.addOutput(createContractScript, 0)
+  txb.addOutput({script: createContractScript, value: 0})
 
   const change = totalValue
     .minus(txfee)
@@ -261,14 +273,15 @@ export function buildCreateContractTransaction(
     .toNumber()
 
   if (change > 0) {
-    txb.addOutput(fromAddress, change)
+    txb.addOutput({address: fromAddress, value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, keyPair)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
-
-  return txb.build().toHex()
+  txb.finalizeAllInputs();
+  return txb.extractTransaction(true).toHex();
 }
 
 const defaultContractSendTxOptions = {
@@ -282,7 +295,7 @@ const defaultContractSendTxOptions = {
 
 export function estimateSendToContractTransactionMaxValue(
   utxos: IUTXO[],
-  keyPair: ECPair,
+  keyPair: ECPairInterface,
   contractAddress: string,
   encodedData: string,
   feeRate: number,
@@ -301,7 +314,7 @@ export function estimateSendToContractTransactionMaxValue(
   amount -= gasLimit * gasPrice
   ensureAmountInteger(amount)
 
-  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address as string
 
   // excess gas will refund in the coinstake tx of the mined block
   const gasLimitFee = new BigNumber(gasLimit).times(gasPrice).toNumber()
@@ -339,7 +352,7 @@ export function estimateSendToContractTransactionMaxValue(
  */
 export function buildSendToContractTransaction(
   utxos: IUTXO[],
-  keyPair: ECPair,
+  keyPair: ECPairInterface,
   contractAddress: string,
   encodedData: string,
   feeRate: number,
@@ -354,7 +367,7 @@ export function buildSendToContractTransaction(
 
   ensureAmountInteger(amount)
 
-  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey}).address
+  const senderAddress = bitcoin.payments.p2pkh({pubkey: keyPair.publicKey, network: keyPair.network}).address as string
 
   // excess gas will refund in the coinstake tx of the mined block
   const gasLimitFee = new BigNumber(gasLimit).times(gasPrice).toNumber()
@@ -374,17 +387,21 @@ export function buildSendToContractTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  const txb = new TransactionBuilder(keyPair.network)
+  const txb = new Psbt({network: keyPair.network})
 
   // add inputs to txb
   let vinSum = new BigNumber(0)
   for (const input of inputs) {
-    txb.addInput(input.hash, input.pos)
+    txb.addInput({
+      hash: input.hash,
+      index: input.pos,
+      nonWitnessUtxo: Buffer.from(input.rawtx, 'hex')
+    });
     vinSum = vinSum.plus(input.value)
   }
 
   // send-to-contract output
-  txb.addOutput(opcallScript, amount)
+  txb.addOutput({script: opcallScript, value: amount})
 
   // change output (in satoshi)
   const change = vinSum
@@ -393,14 +410,15 @@ export function buildSendToContractTransaction(
     .minus(amount)
     .toNumber()
   if (change > 0) {
-    txb.addOutput(senderAddress, change)
+    txb.addOutput({address: senderAddress, value: change})
   }
 
   for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, keyPair)
+    txb.signInput(i, keyPair)
+    txb.validateSignaturesOfInput(i)
   }
-
-  return txb.build().toHex()
+  txb.finalizeAllInputs();
+  return txb.extractTransaction(true).toHex();
 }
 
 // The prevalent network fee is 10 per KB. If set to 100 times of norm, assume error.
