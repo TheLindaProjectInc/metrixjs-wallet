@@ -180,7 +180,6 @@ export function buildPubKeyHashTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  //const txb = new TransactionBuilder(keyPair.network)
   const txb = new Psbt({network: keyPair.network})
 
   let vinSum = new BigNumber(0)
@@ -253,7 +252,6 @@ export function buildCreateContractTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  //const txb = new TransactionBuilder(keyPair.network)
   const txb = new Psbt({network: keyPair.network})
 
   let totalValue = new BigNumber(0)
@@ -389,7 +387,6 @@ export function buildSendToContractTransaction(
     throw new Error("could not find UTXOs to build transaction")
   }
 
-  //const txb = new TransactionBuilder(keyPair.network)
   const txb = new Psbt({network: keyPair.network})
 
   // add inputs to txb
